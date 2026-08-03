@@ -1,0 +1,16 @@
+services:
+  dominicana-tour:
+    build: .
+    container_name: dominicana_tour
+    restart: unless-stopped
+    ports:
+      - "3010:3000"
+    env_file:
+      - .env.production
+    networks:
+      - leymaken_leymaken
+
+networks:
+  leymaken_leymaken:
+    external: true
+

@@ -1,0 +1,286 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+model Tour {
+  id            Int             @id @default(autoincrement())
+  slug          String          @unique
+  name          String
+  subtitle      String
+  description   String          @db.Text
+  priceAdult    Decimal         @db.Decimal(10,2)
+  priceChild    Decimal         @db.Decimal(10,2)
+  costPrice     Decimal?        @db.Decimal(10,2)
+  providerId    Int?
+  provider      Provider?       @relation(fields: [providerId], references: [id])
+  duration      String
+  difficulty    Difficulty
+  categoryId    Int
+  category      Category        @relation(fields: [categoryId], references: [id])
+  maxPeople     Int
+  minAge        Int             @default(0)
+  departureZone String
+  departureTime String
+  languages     String
+  active        Boolean         @default(true)
+  featured      Boolean         @default(false)
+  images        TourImage[]
+  itinerary     ItineraryItem[]
+  includes      TourInclude[]
+  dates         TourDate[]
+  reservations  Reservation[]
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  offers        TourOffer[]
+}
+
+model TourImage {
+  id     Int    @id @default(autoincrement())
+  tourId Int
+  tour   Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  url    String
+  alt    String
+  order  Int    @default(0)
+}
+
+model ItineraryItem {
+  id          Int    @id @default(autoincrement())
+  tourId      Int
+  tour        Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  time        String
+  title       String
+  description String
+  order       Int    @default(0)
+}
+
+model TourInclude {
+  id       Int     @id @default(autoincrement())
+  tourId   Int
+  tour     Tour    @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  text     String
+  included Boolean
+}
+
+model TourDate {
+  id             Int           @id @default(autoincrement())
+  tourId         Int
+  tour           Tour          @relation(fields: [tourId], references: [id])
+  date           DateTime
+  availableSpots Int
+  bookedSpots    Int           @default(0)
+  status         DateStatus    @default(OPEN)
+  reservations   Reservation[]
+}
+
+model Reservation {
+  id              Int           @id @default(autoincrement())
+  code            String        @unique
+  tourId          Int
+  tour            Tour          @relation(fields: [tourId], references: [id])
+  tourDateId      Int
+  tourDate        TourDate      @relation(fields: [tourDateId], references: [id])
+  status          ResStatus     @default(PENDING)
+  firstName       String
+  lastName        String
+  email           String
+  phone           String
+  country         String
+  hotel           String
+  hotelZone       String
+  language        String
+  adults          Int
+  children        Int           @default(0)
+  totalAmount     Decimal       @db.Decimal(10,2)
+  depositAmount   Decimal       @db.Decimal(10,2)
+  paymentMethod   String
+  paidDeposit     Boolean       @default(false)
+  notes           String?       @db.Text
+  internalNotes   String?       @db.Text
+  guideId         Int?
+  guide           User?         @relation(fields: [guideId], references: [id])
+  participants    Participant[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+}
+
+model Participant {
+  id            Int         @id @default(autoincrement())
+  reservationId Int
+  reservation   Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  name          String
+  age           Int?
+}
+
+model User {
+  id           Int           @id @default(autoincrement())
+  name         String
+  email        String        @unique
+  password     String
+  role         Role
+  active       Boolean       @default(true)
+  permissions  String?       @db.Text
+  reservations Reservation[]
+  createdAt    DateTime      @default(now())
+}
+
+model Category {
+  id    Int    @id @default(autoincrement())
+  name  String
+  slug  String @unique
+  icon  String
+  tours Tour[]
+}
+
+
+model Customer {
+  id         Int      @id @default(autoincrement())
+  googleId   String   @unique
+  name       String?
+  email      String   @unique
+  image      String?
+  subscribed Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  savedTours SavedTour[]
+
+  @@map("customers")
+}
+
+enum Difficulty {
+  EASY
+  MODERATE
+  ADVANCED
+}
+
+enum DateStatus {
+  OPEN
+  FULL
+  BLOCKED
+}
+
+enum ResStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+}
+
+enum Role {
+  ADMIN
+  AGENT
+  GUIDE
+}
+
+model SiteConfig {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique @db.VarChar(255)
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+
+  @@map("site_configs")
+}
+
+model ChatLog {
+  id        Int      @id @default(autoincrement())
+  sessionId String
+  message   String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@map("chat_logs")
+  @@index([createdAt])
+}
+
+model TourOffer {
+  id              Int      @id @default(autoincrement())
+  tourId          Int
+  tour            Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  label           String
+  discountPercent Int
+  startsAt        DateTime
+  endsAt          DateTime
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+
+  @@map("tour_offers")
+  @@index([tourId])
+  @@index([active, startsAt, endsAt])
+}
+
+model Coupon {
+  id            Int          @id @default(autoincrement())
+  code          String       @unique
+  description   String?
+  discountType  DiscountType
+  discountValue Decimal      @db.Decimal(10,2)
+  minAmount     Decimal?     @db.Decimal(10,2)
+  maxUses       Int?
+  usedCount     Int          @default(0)
+  expiresAt     DateTime?
+  active        Boolean      @default(true)
+  createdAt     DateTime     @default(now())
+
+  @@map("coupons")
+}
+
+enum DiscountType {
+  PERCENT
+  FIXED
+}
+
+model SavedTour {
+  id           Int      @id @default(autoincrement())
+  customerId   Int
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  tourSlug     String
+  tourName     String
+  tourImage    String?
+  priceAdult   Decimal  @db.Decimal(10,2)
+  categoryIcon String   @default("")
+  createdAt    DateTime @default(now())
+
+  @@unique([customerId, tourSlug])
+  @@map("saved_tours")
+}
+
+model PendingPaypalPayment {
+  id            String   @id @default(uuid())
+  bookingJson   String   @db.Text
+  depositAmount Decimal  @db.Decimal(10,2)
+  paypalOrderId String?
+  createdAt     DateTime @default(now())
+
+  @@map("pending_paypal_payments")
+}
+
+model Provider {
+  id            Int       @id @default(autoincrement())
+  name          String
+  phone         String?
+  email         String?
+  contactPerson String?
+  notes         String?   @db.Text
+  active        Boolean   @default(true)
+  tours         Tour[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Campaign {
+  id             Int       @id @default(autoincrement())
+  name           String
+  type           String    @default("EMAIL")
+  subject        String?
+  body           String    @db.Text
+  status         String    @default("DRAFT")
+  recipientCount Int       @default(0)
+  sentAt         DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  @@map("campaigns")
+}
