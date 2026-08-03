@@ -44,18 +44,18 @@ interface Stat { n: string; label: string }
 
 export function StatsSection({ stats }: { stats: Stat[] }) {
   return (
-    <div className="border-y border-[#EBEBEB] py-10 px-4" data-reveal>
+    <div className="border-y border-dt-border py-10 px-4" data-reveal>
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4">
           {stats.map(({ n, label }, i) => (
             <div
               key={i}
-              className="py-2 px-6 md:px-10 border-l border-[#EBEBEB] first:border-l-0 first:pl-0 text-center md:text-left"
+              className="py-2 px-6 md:px-10 border-l border-dt-border first:border-l-0 first:pl-0 text-center md:text-left"
             >
-              <div className="font-display font-black text-accent text-4xl sm:text-[44px] leading-none tabular-nums">
+              <div className="font-display font-black text-accent text-4xl sm:text-[44px] leading-none tabular-nums stat-num">
                 <CountUp raw={n} />
               </div>
-              <div className="text-[#717171] text-[11px] uppercase tracking-widest mt-1.5 font-semibold">{label}</div>
+              <div className="text-dt-text-3 text-[11px] uppercase tracking-widest mt-1.5 font-semibold">{label}</div>
             </div>
           ))}
         </div>
