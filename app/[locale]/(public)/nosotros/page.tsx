@@ -34,7 +34,7 @@ export default async function NosotrosPage({ params }: Props) {
   ]
 
   return (
-    <div className="bg-dt-bg min-h-screen overflow-x-hidden">
+    <>
 
       {/* ── HERO FOTO ─────────────────────────────────── */}
       <div className="relative h-[55vh] sm:h-[65vh] overflow-hidden">
@@ -58,6 +58,7 @@ export default async function NosotrosPage({ params }: Props) {
       </div>
 
       {/* ── INTRO EDITORIAL ───────────────────────────── */}
+      <section className="dt-sec">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-14 sm:py-20">
         <div className="grid grid-cols-1 md:grid-cols-[2fr_3fr] gap-10 md:gap-16 items-start">
           <div>
@@ -94,9 +95,10 @@ export default async function NosotrosPage({ params }: Props) {
           </div>
         </div>
       </div>
+      </section>
 
       {/* ── COMO FUNCIONA — timeline editorial ────────── */}
-      <div className="bg-dt-dark relative overflow-hidden py-20 px-4">
+      <div className="bg-dt-dark relative overflow-hidden py-20 px-4 mb-1.5">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-accent/20 to-transparent hidden md:block" style={{ top: '55%' }} />
           <div className="absolute top-0 right-0 w-[500px] h-[500px] rounded-full bg-accent/4 blur-3xl" />
@@ -160,6 +162,7 @@ export default async function NosotrosPage({ params }: Props) {
       </div>
 
       {/* ── FAQ ───────────────────────────────────────── */}
+      <section className="dt-sec">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-20">
         <div className="flex flex-col sm:flex-row sm:items-end gap-4 mb-12">
           <div className="flex-1">
@@ -172,7 +175,8 @@ export default async function NosotrosPage({ params }: Props) {
         </div>
         <FaqAccordion faqs={FAQS} />
       </div>
+      </section>
 
-    </div>
+    </>
   )
 }

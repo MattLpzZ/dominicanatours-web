@@ -22,10 +22,11 @@ export default async function CuentaPage() {
 
   if (!session?.user?.email) {
     return (
-      <div className="min-h-screen bg-dt-bg flex flex-col items-center justify-center px-4">
+      <section className="dt-sec">
+      <div className="flex flex-col items-center justify-center px-4 py-24">
         <div className="w-full max-w-sm bg-dt-surface border border-dt-border rounded-2xl p-8 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-[#E85D20]/15 border border-[#E85D20]/20 flex items-center justify-center mx-auto mb-6">
-            <svg className="w-8 h-8 text-[#E85D20]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <div className="w-16 h-16 rounded-2xl bg-accent/15 border border-accent/20 flex items-center justify-center mx-auto mb-6">
+            <svg className="w-8 h-8 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
           </div>
@@ -47,10 +48,11 @@ export default async function CuentaPage() {
             </button>
           </form>
           <p className="text-dt-text-3 text-xs mt-4">
-            <Link href="/mis-reservas" className="text-[#E85D20] hover:underline">Buscar reserva por código</Link>
+            <Link href="/mis-reservas" className="text-accent hover:underline">Buscar reserva por código</Link>
           </p>
         </div>
       </div>
+      </section>
     )
   }
 
@@ -82,7 +84,8 @@ export default async function CuentaPage() {
   }
 
   return (
-    <div className="min-h-screen bg-dt-bg pt-10 pb-16 px-4">
+    <section className="dt-sec">
+    <div className="pt-10 pb-16 px-4">
       <div className="max-w-2xl mx-auto space-y-6">
 
         {/* Profile card */}
@@ -91,7 +94,7 @@ export default async function CuentaPage() {
             <Image src={session.user.image} alt="" width={56} height={56}
               className="w-14 h-14 rounded-full shrink-0 border border-dt-border" referrerPolicy="no-referrer" />
           ) : (
-            <div className="w-14 h-14 rounded-full bg-[#E85D20]/20 border border-[#E85D20]/30 flex items-center justify-center shrink-0 text-[#E85D20] font-bold text-xl">
+            <div className="w-14 h-14 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center shrink-0 text-accent font-bold text-xl">
               {session.user.name?.[0] ?? '?'}
             </div>
           )}
@@ -168,7 +171,7 @@ export default async function CuentaPage() {
           {reservations.length === 0 ? (
             <div className="bg-dt-surface border border-dt-border rounded-2xl p-8 text-center">
               <p className="text-dt-text-2 text-sm mb-4">No tienes reservaciones registradas con este correo.</p>
-              <Link href="/excursiones" className="inline-flex items-center gap-2 bg-[#E85D20] text-white font-bold text-sm px-6 py-2.5 rounded-xl hover:bg-[#d44e15] transition-colors">
+              <Link href="/excursiones" className="inline-flex items-center gap-2 bg-accent text-white font-bold text-sm px-6 py-2.5 rounded-xl hover:bg-accent/90 transition-colors">
                 Explorar excursiones →
               </Link>
             </div>
@@ -205,5 +208,6 @@ export default async function CuentaPage() {
 
       </div>
     </div>
+    </section>
   )
 }

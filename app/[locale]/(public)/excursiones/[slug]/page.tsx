@@ -88,7 +88,6 @@ export default async function TourDetailPage({ params }: Props) {
   return (
     <>
       <TourJsonLd tour={tour} category={tour.category ?? { name: '', slug: '' }} />
-      <div className="min-h-screen">
 
         {/* Hero */}
         {heroImg ? (
@@ -115,7 +114,7 @@ export default async function TourDetailPage({ params }: Props) {
             </div>
           </div>
         ) : (
-          <div className="pt-20 bg-dt-bg-2">
+          <section className="dt-sec">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
               <div className="flex items-center gap-2 flex-wrap mb-3">
                 <Badge variant="green">{t('bestSeller')}</Badge>
@@ -125,7 +124,7 @@ export default async function TourDetailPage({ params }: Props) {
               <h1 className="font-display font-bold text-3xl sm:text-4xl text-dt-text mb-2">{tour.name}</h1>
               <p className="text-dt-text-2">{tour.subtitle}</p>
             </div>
-          </div>
+          </section>
         )}
 
         {/* Sticky meta bar */}
@@ -154,7 +153,8 @@ export default async function TourDetailPage({ params }: Props) {
         </div>
 
         {/* Main content */}
-        <div className="bg-dt-bg-2 max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <section className="dt-sec">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
           <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-8 items-start">
 
             {/* Left */}
@@ -357,19 +357,19 @@ export default async function TourDetailPage({ params }: Props) {
             </div>
           </div>
         </div>
+        </section>
 
         {/* Related */}
         {related.length > 0 && (
-          <div className="border-t border-dt-border py-14">
+          <section className="dt-sec py-14">
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
               <h2 className="font-display font-black text-dt-text text-2xl mb-6">{t('relatedTitle')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {related.map(t => <TourCard key={t.id} tour={t} />)}
               </div>
             </div>
-          </div>
+          </section>
         )}
-      </div>
     </>
   )
 }

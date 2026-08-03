@@ -42,7 +42,7 @@ export default async function ConfirmationPage({ params }: Props) {
   const tourDate = booking.availability?.date
 
   return (
-    <div className="pt-20 bg-dt-bg-2 min-h-screen">
+    <section className="dt-sec">
       <div className="max-w-xl mx-auto px-4 sm:px-6 py-16 text-center">
         <div className="text-6xl mb-4">🎉</div>
         <h1 className="text-3xl font-black mb-2">¡Reserva recibida!</h1>
@@ -50,7 +50,7 @@ export default async function ConfirmationPage({ params }: Props) {
           Te confirmaremos por email y WhatsApp en menos de 2 horas.
         </p>
 
-        <div className="bg-white border border-dt-border rounded-dt p-6 text-left mb-6">
+        <div className="bg-dt-surface border border-dt-border rounded-dt p-6 text-left mb-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-bold">Detalles de tu reserva</h2>
             <span className="bg-amber-50 text-amber-700 border border-amber-200 text-xs font-bold px-3 py-1 rounded-full">
@@ -119,6 +119,6 @@ export default async function ConfirmationPage({ params }: Props) {
           </Link>
         </div>
       </div>
-    </div>
+    </section>
   )
 }

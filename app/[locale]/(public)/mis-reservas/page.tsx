@@ -28,9 +28,9 @@ export default function MisReservasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-dt-bg flex flex-col">
+    <>
       {/* Hero strip */}
-      <div className="bg-dt-dark pt-28 pb-14 px-4 text-center">
+      <div className="bg-dt-dark pt-28 pb-14 px-4 text-center mb-1.5">
         <p className="text-accent text-xs font-bold uppercase tracking-widest mb-3">Tus reservas</p>
         <h1 className="font-display font-bold text-white text-4xl sm:text-5xl mb-4">Consulta tu reserva</h1>
         <p className="text-white/45 max-w-sm mx-auto text-base">
@@ -39,6 +39,7 @@ export default function MisReservasPage() {
       </div>
 
       {/* Form */}
+      <section className="dt-sec">
       <div className="max-w-md mx-auto w-full px-4 py-12">
         <form onSubmit={handleSubmit} className="bg-dt-surface border border-dt-border rounded-2xl p-6 sm:p-8">
           <label className="block text-dt-text text-sm font-semibold mb-2">Codigo de reserva</label>
@@ -76,6 +77,7 @@ export default function MisReservasPage() {
           </Link>
         </div>
       </div>
-    </div>
+      </section>
+    </>
   )
 }
