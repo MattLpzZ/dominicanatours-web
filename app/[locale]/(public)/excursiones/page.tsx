@@ -6,7 +6,7 @@ import { ExcursionesClient } from '@/components/catalog/ExcursionesClient'
 
 export const metadata: Metadata = {
   title: 'Excursiones en República Dominicana | Dominicana Tour',
-  description: 'Más de 20 excursiones únicas en toda República Dominicana. Explora el mapa y filtra por destino, dificultad y precio.',
+  description: 'Más de 20 excursiones únicas en toda República Dominicana. Filtra por destino, categoría y precio.',
 }
 
 interface Props {
