@@ -1,76 +1,60 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { DifficultyBadge } from '@/components/ui/DifficultyBadge'
-import { AddToCartBtn } from '@/components/catalog/AddToCartBtn'
 import type { ApiProduct } from '@/components/catalog/ExcursionesClient'
 
 export function TourCard({ tour }: { tour: ApiProduct }) {
   const coverImg = tour.cover_image
-  const cartItem = {
-    id: tour.id,
-    slug: tour.slug,
-    name: tour.name,
-    priceAdult: Number(tour.price_adult),
-    imageUrl: coverImg ?? null,
-    categoryIcon: tour.category?.icon ?? '',
-  }
-  const diffLabel = tour.difficulty?.toUpperCase() as 'EASY' | 'MODERATE' | 'ADVANCED'
 
   return (
-    <article className="group rounded-dt overflow-hidden bg-dt-surface border border-dt-border shadow-dt hover:shadow-dt-md transition-all duration-300 hover:-translate-y-1 card-shimmer flex flex-col">
-      {/* Image */}
-      <div className="relative h-52 shrink-0 overflow-hidden">
+    <Link
+      href={`/excursiones/${tour.slug}`}
+      className="group block rounded-lg overflow-hidden bg-dt-surface border border-dt-border transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-[5px] hover:shadow-[0_8px_32px_rgba(0,0,0,0.10)] hover:border-[var(--color-border-2)]"
+    >
+      {/* Image — 3:2 */}
+      <div className="relative overflow-hidden bg-dt-bg-2" style={{ aspectRatio: '3/2' }}>
         {coverImg ? (
-          <Image src={coverImg} alt={tour.name} fill className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out" />
+          <Image
+            src={coverImg}
+            alt={tour.name}
+            fill
+            className="object-cover transition-transform duration-500 group-hover:scale-[1.06]"
+          />
         ) : (
-          <div className="w-full h-full bg-dt-bg-2 flex items-center justify-center text-4xl">{tour.category?.icon}</div>
+          <div className="absolute inset-0 flex items-center justify-center text-5xl">
+            {tour.category?.icon}
+          </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-
-        {/* Top chips */}
-        <div className="absolute top-3 left-3 right-3 flex items-start justify-between gap-2">
-          <span className="bg-dt-surface/90 backdrop-blur-sm text-xs font-bold text-dt-text px-2.5 py-1 rounded-full">
-            {tour.category?.icon} {tour.category?.name}
+        {tour.featured && (
+          <span className="absolute top-2.5 left-2.5 bg-black/55 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-[3px] rounded-full tracking-[0.03em]">
+            Top rated
           </span>
-          {tour.featured && (
-            <span className="bg-accent text-white text-xs font-bold px-2.5 py-1 rounded-full shrink-0">⭐ Top</span>
-          )}
-        </div>
-
-        {/* Price at bottom */}
-        <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
-          <span className="text-white/70 text-xs">★★★★★ 4.9</span>
-          <span className="bg-accent text-white text-sm font-bold px-3 py-1 rounded-full">
-            ${Number(tour.price_adult).toFixed(0)} USD
-          </span>
-        </div>
+        )}
       </div>
 
-      {/* Content */}
-      <div className="p-4 flex flex-col flex-1 gap-2.5">
-        <h3 className="font-display font-bold text-dt-text text-base leading-tight line-clamp-2">{tour.name}</h3>
-
-        <div className="flex items-center gap-2 flex-wrap">
-          <DifficultyBadge difficulty={diffLabel} />
-          <span className="text-dt-text-3 text-xs">·</span>
-          <span className="text-xs text-dt-text-2">⏱️ {tour.duration}</span>
-          <span className="text-dt-text-3 text-xs">·</span>
-          <span className="text-xs text-dt-text-2">📍 {tour.departure_zone}</span>
-        </div>
-
-        <p className="text-dt-text-3 text-sm line-clamp-2 flex-1">{tour.subtitle}</p>
-
-        {/* CTA row */}
-        <div className="grid grid-cols-[1fr_auto] gap-2 mt-1">
-          <Link
-            href={`/excursiones/${tour.slug}`}
-            className="text-center bg-dt-dark text-white text-sm font-bold py-2.5 rounded-dt-sm hover:bg-accent transition-colors duration-200"
-          >
-            Ver experiencia →
-          </Link>
-          <AddToCartBtn item={cartItem} compact />
+      {/* Body */}
+      <div className="p-3.5">
+        <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-dt-text-3 mb-1.5">
+          {tour.category?.name}{tour.departure_zone ? ` · ${tour.departure_zone}` : ''}
+        </p>
+        <h3 className="text-[15px] font-bold text-dt-text leading-[1.3] mb-2.5 line-clamp-2">
+          {tour.name}
+        </h3>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1 text-[13px] font-bold text-dt-text">
+            <svg className="w-3 h-3 fill-[#F79009] shrink-0" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+            </svg>
+            4.9
+            <span className="text-dt-text-3 font-normal text-xs">(200+)</span>
+          </div>
+          <div className="text-right">
+            <div className="text-[10px] text-dt-text-3 leading-none mb-0.5">Desde</div>
+            <div className="text-[14px] font-extrabold text-accent leading-none">
+              ${Number(tour.price_adult).toFixed(0)} USD
+            </div>
+          </div>
         </div>
       </div>
-    </article>
+    </Link>
   )
 }
