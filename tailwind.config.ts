@@ -19,8 +19,8 @@ const config: Config = {
         gold: '#E8B94F',
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        display: ['Syne', 'sans-serif'],
+        sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['var(--font-display)', 'Georgia', 'ui-serif', 'serif'],
       },
       borderRadius: { dt: '16px', 'dt-sm': '10px' },
       boxShadow: {

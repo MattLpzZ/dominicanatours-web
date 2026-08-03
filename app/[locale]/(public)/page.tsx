@@ -9,27 +9,12 @@ import type { Metadata } from 'next'
 import { getSiteConfig } from '@/lib/site-config'
 
 export const metadata: Metadata = {
-  title: 'Dominicana Tour | Operadora Turistica Oficial',
-  description: 'Operadora turistica oficial en Republica Dominicana. Excursiones autenticas con guias certificados, grupos pequenos y transporte puerta a puerta.',
+  title: 'Dominicana Tour | Operadora Turística #1 en República Dominicana',
+  description:
+    'Somos la operadora turística #1 en República Dominicana. Excursiones auténticas con guías locales certificados en las 32 provincias. Grupos pequeños, transporte incluido y cancelación flexible.',
 }
 
 interface ZoneData { name: string; count: number; image: string | null }
-
-function OrganizationLd() {
-  return (
-    <script type="application/ld+json" dangerouslySetInnerHTML={{
-      __html: JSON.stringify({
-        '@context': 'https://schema.org',
-        '@type': 'TouristInformationCenter',
-        name: 'Dominicana Tour',
-        url: 'https://dominicanatour.com',
-        description: 'Operadora turistica oficial en Republica Dominicana.',
-        address: { '@type': 'PostalAddress', addressCountry: 'DO' },
-        aggregateRating: { '@type': 'AggregateRating', ratingValue: '4.9', reviewCount: '820' },
-      }),
-    }} />
-  )
-}
 
 async function getData() {
   try {
@@ -89,8 +74,6 @@ export default async function LandingPage() {
 
   return (
     <>
-      <OrganizationLd />
-
       {/* ── HERO ── */}
       <section className="dt-sec px-4 sm:px-6 py-20 sm:py-24 text-center">
         <div className="max-w-[640px] mx-auto">
