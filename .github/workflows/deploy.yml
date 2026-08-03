@@ -1,0 +1,46 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          password: ${{ secrets.VPS_PASSWORD }}
+          timeout: 300s
+          script: |
+            set -e
+            CONTAINER="qo4rkltla0uptws0yxic4b8w-707x8ke5t3xww2u0roqbsood-011433307711-1"
+
+            cd /var/www/dominicana-tour
+            git pull origin main
+
+            docker build -t dominicana-tour:rebuilt .
+
+            docker stop "$CONTAINER" || true
+            docker rm "$CONTAINER" || true
+
+            docker run -d \
+              --name "$CONTAINER" \
+              --network leymaken_leymaken \
+              --restart unless-stopped \
+              -p 127.0.0.1:3010:3000 \
+              -e NODE_ENV=production \
+              -e DATABASE_URL="${{ secrets.DT_DATABASE_URL }}" \
+              -e AUTH_SECRET="${{ secrets.DT_AUTH_SECRET }}" \
+              -e AUTH_TRUST_HOST=true \
+              -e NEXT_PUBLIC_API_URL="${{ secrets.DT_API_URL }}" \
+              -e GOOGLE_CLIENT_ID="${{ secrets.DT_GOOGLE_CLIENT_ID }}" \
+              -e GOOGLE_CLIENT_SECRET="${{ secrets.DT_GOOGLE_CLIENT_SECRET }}" \
+              -e PORT=3000 \
+              -e HOSTNAME=0.0.0.0 \
+              dominicana-tour:rebuilt
+
+            echo "Deploy complete"
