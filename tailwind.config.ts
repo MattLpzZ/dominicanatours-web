@@ -20,7 +20,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ['var(--font-sans)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-        display: ['var(--font-display)', 'Georgia', 'ui-serif', 'serif'],
+        display: ['var(--font-display)', 'ui-sans-serif', 'system-ui', 'sans-serif'],
       },
       borderRadius: { dt: '16px', 'dt-sm': '10px' },
       boxShadow: {

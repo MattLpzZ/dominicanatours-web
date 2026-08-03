@@ -46,7 +46,7 @@
     background-color: #060A10;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='10' cy='10' r='1.4' fill='rgba(255,255,255,0.06)'/%3E%3C/svg%3E");
   }
-  h1, h2, h3, h4, h5 { font-family: var(--font-display), Georgia, ui-serif, serif; @apply tracking-tight; }
+  h1, h2, h3, h4, h5 { font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif; @apply tracking-tight; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: #E85D20; border-radius: 9999px; }

@@ -1,19 +1,18 @@
 import type { Metadata } from 'next'
-import { Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google'
+import { Bricolage_Grotesque, Inter } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
 import SessionProvider from './session-provider'
 import { EditModeListener } from '@/components/EditModeListener'
 import './globals.css'
 
-const playfair = Playfair_Display({
+const bricolage = Bricolage_Grotesque({
   subsets: ['latin'],
-  weight: ['400', '600', '700', '800'],
-  style: ['normal', 'italic'],
+  weight: ['400', '500', '600', '700', '800'],
   variable: '--font-display',
   display: 'swap',
 })
 
-const jakarta = Plus_Jakarta_Sans({
+const inter = Inter({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700'],
   variable: '--font-sans',
@@ -151,7 +150,7 @@ function WebsiteLd() {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" suppressHydrationWarning className={`${playfair.variable} ${jakarta.variable}`}>
+    <html lang="es" suppressHydrationWarning className={`${bricolage.variable} ${inter.variable}`}>
       <head>
         <meta name="theme-color" content="#E85D20" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#FF6B35" media="(prefers-color-scheme: dark)" />
