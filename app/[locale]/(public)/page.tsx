@@ -77,9 +77,9 @@ function CatIcon({ slug, icon }: { slug: string; icon?: string | null }) {
   const s = resolvedSlug
   const sp = { fill: 'none', stroke: 'white', strokeWidth: 1.75, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
 
-  let icon: React.ReactNode
+  let svgIcon: React.ReactNode
   if (s.includes('playa') || s.includes('mar')) {
-    icon = (
+    svgIcon = (
       <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" {...sp}>
         <path d="M12 3a5 5 0 010 10"/>
         <path d="M2 16c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/>
@@ -87,14 +87,14 @@ function CatIcon({ slug, icon }: { slug: string; icon?: string | null }) {
       </svg>
     )
   } else if (s.includes('aventura')) {
-    icon = (
+    svgIcon = (
       <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" {...sp}>
         <path d="M3 20h18L12 4 3 20z"/>
         <path d="M9.5 14.5 12 9l2.5 5.5"/>
       </svg>
     )
   } else if (s.includes('cultur') || s.includes('histor')) {
-    icon = (
+    svgIcon = (
       <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" {...sp}>
         <path d="M3 21h18"/>
         <path d="M4 18h16"/>
@@ -103,7 +103,7 @@ function CatIcon({ slug, icon }: { slug: string; icon?: string | null }) {
       </svg>
     )
   } else if (s.includes('fauna') || s.includes('natur')) {
-    icon = (
+    svgIcon = (
       <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" {...sp}>
         <path d="M17 8C8 10 5.9 16.17 3.82 19.84"/>
         <path d="M3 18.01L4 20l2.5-2.5C7.32 16.84 8.87 16 10.5 16c2 0 4 1 4 3"/>
@@ -111,14 +111,14 @@ function CatIcon({ slug, icon }: { slug: string; icon?: string | null }) {
       </svg>
     )
   } else if (s.includes('noctur')) {
-    icon = (
+    svgIcon = (
       <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" {...sp}>
         <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
         <path d="M16 5l.5-1 .5 1 1 .5-1 .5-.5 1-.5-1-1-.5 1-.5z"/>
       </svg>
     )
   } else {
-    icon = (
+    svgIcon = (
       <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" {...sp}>
         <circle cx="12" cy="12" r="9"/>
         <path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/>
@@ -128,7 +128,7 @@ function CatIcon({ slug, icon }: { slug: string; icon?: string | null }) {
 
   return (
     <div className="w-full h-full rounded-[10px] flex items-center justify-center" style={{ background: color }}>
-      {icon}
+      {svgIcon}
     </div>
   )
 }
