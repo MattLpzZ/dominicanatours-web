@@ -69,7 +69,7 @@ export function Navbar({ zones = [], categories = [] }: Props) {
               value={search}
               onChange={e => setSearch(e.target.value)}
               type="text"
-              placeholder="Buscar destino..."
+              placeholder={t('searchPlaceholder')}
               className="w-full pl-9 pr-4 py-2 text-sm rounded-full border border-dt-border bg-dt-bg-2 text-dt-text placeholder:text-dt-text-3 focus:outline-none focus:border-accent/40 transition-colors"
             />
           </form>
@@ -143,7 +143,7 @@ export function Navbar({ zones = [], categories = [] }: Props) {
                   : 'border-transparent text-dt-text-3 hover:text-dt-text hover:border-dt-border',
               )}
             >
-              Lugares que ver
+              {t('navLugares')}
               <svg className={cn('w-3 h-3 shrink-0 transition-transform duration-200', activeDD === 'lugares' && 'rotate-180')} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/>
               </svg>
@@ -159,7 +159,7 @@ export function Navbar({ zones = [], categories = [] }: Props) {
                   : 'border-transparent text-dt-text-3 hover:text-dt-text hover:border-dt-border',
               )}
             >
-              Cosas que hacer
+              {t('navHacer')}
               <svg className={cn('w-3 h-3 shrink-0 transition-transform duration-200', activeDD === 'hacer' && 'rotate-180')} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/>
               </svg>
@@ -172,7 +172,7 @@ export function Navbar({ zones = [], categories = [] }: Props) {
                   ? 'border-accent text-dt-text'
                   : 'border-transparent text-dt-text-3 hover:text-dt-text hover:border-dt-border',
               )}>
-              Inspiración de viaje
+              {t('navInspi')}
             </Link>
 
           </div>
@@ -187,10 +187,10 @@ export function Navbar({ zones = [], categories = [] }: Props) {
       >
         <div className="max-w-[1400px] mx-auto px-8 py-7">
           <div className="flex items-center justify-between mb-5">
-            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3">Destinos populares</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3">{t('ddDestinosLabel')}</p>
             <Link href="/excursiones" onClick={closeDD}
               className="text-[12px] font-semibold text-accent hover:opacity-75 transition-opacity">
-              Ver todos →
+              {t('ddSeeAll')}
             </Link>
           </div>
           {zones.length > 0 ? (
@@ -214,7 +214,7 @@ export function Navbar({ zones = [], categories = [] }: Props) {
               ))}
             </div>
           ) : (
-            <p className="text-[13px] text-dt-text-3">Cargando destinos...</p>
+            <p className="text-[13px] text-dt-text-3">{t('loadingDestinos')}</p>
           )}
         </div>
       </div>
@@ -227,10 +227,10 @@ export function Navbar({ zones = [], categories = [] }: Props) {
       >
         <div className="max-w-[1400px] mx-auto px-8 py-7">
           <div className="flex items-center justify-between mb-5">
-            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3">Tipos de experiencia</p>
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3">{t('ddCatsLabel')}</p>
             <Link href="/excursiones" onClick={closeDD}
               className="text-[12px] font-semibold text-accent hover:opacity-75 transition-opacity">
-              Ver todas →
+              {t('ddSeeAll')}
             </Link>
           </div>
           {categories.length > 0 ? (
@@ -255,7 +255,7 @@ export function Navbar({ zones = [], categories = [] }: Props) {
               ))}
             </div>
           ) : (
-            <p className="text-[13px] text-dt-text-3">Cargando categorías...</p>
+            <p className="text-[13px] text-dt-text-3">{t('loadingCats')}</p>
           )}
         </div>
       </div>
@@ -282,22 +282,22 @@ export function Navbar({ zones = [], categories = [] }: Props) {
               value={search}
               onChange={e => setSearch(e.target.value)}
               type="text"
-              placeholder="Buscar destino..."
+              placeholder={t('searchPlaceholder')}
               className="w-full pl-9 pr-4 py-3 text-sm rounded-xl border border-dt-border bg-dt-bg-2 text-dt-text placeholder:text-dt-text-3 focus:outline-none"
             />
           </form>
 
           <Link href="/excursiones"
             className={cn('text-2xl font-display font-bold py-4 border-b border-dt-border transition-colors', pathname.startsWith('/excursiones') ? 'text-accent' : 'text-dt-text hover:text-accent')}>
-            Lugares que ver
+            {t('navLugares')}
           </Link>
           <Link href="/excursiones"
             className={cn('text-2xl font-display font-bold py-4 border-b border-dt-border transition-colors', pathname.startsWith('/excursiones') ? 'text-accent' : 'text-dt-text hover:text-accent')}>
-            Cosas que hacer
+            {t('navHacer')}
           </Link>
           <Link href="/nosotros"
             className={cn('text-2xl font-display font-bold py-4 border-b border-dt-border transition-colors', pathname === '/nosotros' ? 'text-accent' : 'text-dt-text hover:text-accent')}>
-            Inspiración de viaje
+            {t('navInspi')}
           </Link>
 
           <div className="mt-auto pt-8 flex flex-col gap-3">

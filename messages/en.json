@@ -8,7 +8,16 @@
     "reservarExcursion": "Book a tour",
     "miCuenta": "My Account",
     "entrarConGoogle": "Sign in with Google",
-    "langSwitch": "ES"
+    "langSwitch": "ES",
+    "navLugares": "Places to See",
+    "navHacer": "Things to Do",
+    "navInspi": "Travel Inspiration",
+    "ddDestinosLabel": "Popular Destinations",
+    "ddCatsLabel": "Types of Experience",
+    "ddSeeAll": "See all →",
+    "searchPlaceholder": "Search destination...",
+    "loadingDestinos": "Loading destinations...",
+    "loadingCats": "Loading categories..."
   },
   "footer": {
     "description": "Leading national tour operator in the Dominican Republic since 2016. Authentic experiences with certified Dominican guides.",

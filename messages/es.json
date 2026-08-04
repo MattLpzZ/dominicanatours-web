@@ -8,7 +8,16 @@
     "reservarExcursion": "Reservar excursión",
     "miCuenta": "Mi Cuenta",
     "entrarConGoogle": "Entrar con Google",
-    "langSwitch": "EN"
+    "langSwitch": "EN",
+    "navLugares": "Lugares que ver",
+    "navHacer": "Cosas que hacer",
+    "navInspi": "Inspiración de viaje",
+    "ddDestinosLabel": "Destinos populares",
+    "ddCatsLabel": "Tipos de experiencia",
+    "ddSeeAll": "Ver todos →",
+    "searchPlaceholder": "Buscar destino...",
+    "loadingDestinos": "Cargando destinos...",
+    "loadingCats": "Cargando categorías..."
   },
   "footer": {
     "description": "Operadora turística nacional líder en República Dominicana desde 2016. Experiencias auténticas con guías dominicanos certificados.",
