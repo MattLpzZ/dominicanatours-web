@@ -54,12 +54,74 @@ function ZoneInitials({ name }: { name: string }) {
   )
 }
 
-function CatInitials({ name }: { name: string }) {
-  const colors = ['#0369a1','#0891b2','#1d4ed8','#15803d','#b45309','#7c3aed','#be185d','#0f766e','#c2410c']
-  const idx = name.charCodeAt(0) % colors.length
+function getCatColor(slug: string) {
+  const s = slug.toLowerCase()
+  if (s.includes('playa') || s.includes('mar'))     return '#0099CC'
+  if (s.includes('aventura'))                        return '#22C55E'
+  if (s.includes('cultur') || s.includes('histor')) return '#F59E0B'
+  if (s.includes('fauna') || s.includes('natur'))   return '#10B981'
+  if (s.includes('noctur'))                         return '#8B5CF6'
+  const palette = ['#0099CC', '#22C55E', '#F59E0B', '#8B5CF6', '#E85D20', '#EC4899']
+  return palette[slug.charCodeAt(0) % palette.length]
+}
+
+function CatIcon({ slug }: { slug: string }) {
+  const color = getCatColor(slug)
+  const s = slug.toLowerCase()
+  const sp = { fill: 'none', stroke: 'white', strokeWidth: 1.75, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
+
+  let icon: React.ReactNode
+  if (s.includes('playa') || s.includes('mar')) {
+    icon = (
+      <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" {...sp}>
+        <path d="M12 3a5 5 0 010 10"/>
+        <path d="M2 16c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/>
+        <path d="M2 20c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/>
+      </svg>
+    )
+  } else if (s.includes('aventura')) {
+    icon = (
+      <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" {...sp}>
+        <path d="M3 20h18L12 4 3 20z"/>
+        <path d="M9.5 14.5 12 9l2.5 5.5"/>
+      </svg>
+    )
+  } else if (s.includes('cultur') || s.includes('histor')) {
+    icon = (
+      <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" {...sp}>
+        <path d="M3 21h18"/>
+        <path d="M4 18h16"/>
+        <path d="M6 18V9M10 18V9M14 18V9M18 18V9"/>
+        <path d="M2 9h20M12 3 2 9h20L12 3z"/>
+      </svg>
+    )
+  } else if (s.includes('fauna') || s.includes('natur')) {
+    icon = (
+      <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" {...sp}>
+        <path d="M17 8C8 10 5.9 16.17 3.82 19.84"/>
+        <path d="M3 18.01L4 20l2.5-2.5C7.32 16.84 8.87 16 10.5 16c2 0 4 1 4 3"/>
+        <path d="M21 5c0 5.5-3.62 10.14-9 11"/>
+      </svg>
+    )
+  } else if (s.includes('noctur')) {
+    icon = (
+      <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" {...sp}>
+        <path d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+        <path d="M16 5l.5-1 .5 1 1 .5-1 .5-.5 1-.5-1-1-.5 1-.5z"/>
+      </svg>
+    )
+  } else {
+    icon = (
+      <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" {...sp}>
+        <circle cx="12" cy="12" r="9"/>
+        <path d="M16.24 7.76l-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"/>
+      </svg>
+    )
+  }
+
   return (
-    <div className="w-full h-full rounded-[10px] flex items-center justify-center text-white text-sm font-black" style={{ background: colors[idx] }}>
-      {name[0].toUpperCase()}
+    <div className="w-full h-full rounded-[10px] flex items-center justify-center" style={{ background: color }}>
+      {icon}
     </div>
   )
 }
@@ -180,7 +242,7 @@ export default async function LandingPage({ params }: Props) {
                   className="flex flex-col items-center gap-2.5 p-[18px_12px] rounded-lg text-center border border-dt-border bg-dt-surface transition-[border-color,background,transform,box-shadow] duration-200 hover:border-accent/30 hover:-translate-y-[3px] hover:shadow-[0_4px_14px_rgba(232,93,32,0.08)] hover:bg-dt-bg-2"
                 >
                   <div className="w-11 h-11">
-                    <CatInitials name={cat.name} />
+                    <CatIcon slug={cat.slug} />
                   </div>
                   <p className="text-[12px] font-semibold leading-[1.3] text-dt-text-2">{cat.name}</p>
                 </Link>
