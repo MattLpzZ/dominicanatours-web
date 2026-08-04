@@ -99,7 +99,13 @@
     "minAge": "min. age {n}",
     "langs": "languages",
     "copyLink": "Copy link",
-    "linkCopied": "Link copied"
+    "linkCopied": "Link copied",
+    "languages": "Languages",
+    "includedLabel": "Included",
+    "excludedLabel": "Not included",
+    "offerDiscount": "-{pct}% off",
+    "offerValidUntil": "Valid until {date}",
+    "pricePerAdult": "USD / adult"
   },
   "nosotros": {
     "eyebrow": "Who We Are",

@@ -65,9 +65,16 @@ function getCatColor(slug: string) {
   return palette[slug.charCodeAt(0) % palette.length]
 }
 
-function CatIcon({ slug }: { slug: string }) {
+const ICON_KEY_MAP: Record<string, string> = {
+  Waves: 'playa', Mountain: 'aventura', Landmark: 'cultur',
+  Leaf: 'natur', Moon: 'noctur', TreePine: 'natur', Flame: 'aventura',
+  Fish: 'playa', Compass: 'aventura', Footprints: 'aventura',
+}
+
+function CatIcon({ slug, icon }: { slug: string; icon?: string | null }) {
   const color = getCatColor(slug)
-  const s = slug.toLowerCase()
+  const resolvedSlug = icon ? (ICON_KEY_MAP[icon] ?? slug.toLowerCase()) : slug.toLowerCase()
+  const s = resolvedSlug
   const sp = { fill: 'none', stroke: 'white', strokeWidth: 1.75, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
 
   let icon: React.ReactNode
@@ -242,7 +249,7 @@ export default async function LandingPage({ params }: Props) {
                   className="flex flex-col items-center gap-2.5 p-[18px_12px] rounded-lg text-center border border-dt-border bg-dt-surface transition-[border-color,background,transform,box-shadow] duration-200 hover:border-accent/30 hover:-translate-y-[3px] hover:shadow-[0_4px_14px_rgba(232,93,32,0.08)] hover:bg-dt-bg-2"
                 >
                   <div className="w-11 h-11">
-                    <CatIcon slug={cat.slug} />
+                    <CatIcon slug={cat.slug} icon={cat.icon} />
                   </div>
                   <p className="text-[12px] font-semibold leading-[1.3] text-dt-text-2">{cat.name}</p>
                 </Link>

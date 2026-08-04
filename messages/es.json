@@ -99,7 +99,13 @@
     "minAge": "edad mín. {n} años",
     "langs": "idiomas",
     "copyLink": "Copiar enlace",
-    "linkCopied": "Enlace copiado"
+    "linkCopied": "Enlace copiado",
+    "languages": "Idiomas",
+    "includedLabel": "Incluido",
+    "excludedLabel": "No incluido",
+    "offerDiscount": "-{pct}% descuento",
+    "offerValidUntil": "Válido hasta {date}",
+    "pricePerAdult": "USD / adulto"
   },
   "nosotros": {
     "eyebrow": "Quiénes somos",

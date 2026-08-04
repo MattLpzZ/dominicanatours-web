@@ -35,8 +35,8 @@ interface ApiProductDetail extends ApiProduct {
 
 interface Props { params: Promise<{ locale: string; slug: string }> }
 
-function fmtDate(d: Date) {
-  return new Intl.DateTimeFormat('es-DO', { day: 'numeric', month: 'short' }).format(d)
+function fmtDate(d: Date, locale: string) {
+  return new Intl.DateTimeFormat(locale === 'en' ? 'en-US' : 'es-DO', { day: 'numeric', month: 'short' }).format(d)
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -178,10 +178,10 @@ export default async function TourDetailPage({ params }: Props) {
               {/* Stats */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {[
-                  { label: t('duration'),  value: tour.duration,                iconD: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
-                  { label: t('group'),     value: `Máx ${tour.max_people ?? '—'}`, iconD: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
-                  { label: t('departure'), value: tour.departure_time ?? '—',   iconD: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
-                  { label: 'Idiomas',      value: (tour.languages ?? 'ES / EN').split(',')[0]?.trim(), iconD: 'M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129' },
+                  { label: t('duration'),  value: tour.duration,                                         iconD: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' },
+                  { label: t('group'),     value: tour.max_people ? t('maxGroup', { n: tour.max_people }) : '—', iconD: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z' },
+                  { label: t('departure'), value: tour.departure_time ?? '—',                              iconD: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' },
+                  { label: t('languages'), value: (tour.languages ?? 'ES / EN').split(',')[0]?.trim(),    iconD: 'M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129' },
                 ].map(s => (
                   <div key={s.label} className="bg-dt-surface border border-dt-border rounded-xl p-3">
                     <svg className="w-5 h-5 text-accent mb-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75}>
@@ -206,7 +206,7 @@ export default async function TourDetailPage({ params }: Props) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     {included.length > 0 && (
                       <div>
-                        <p className="text-emerald-400 text-[11px] font-bold uppercase tracking-widest mb-3">Incluido</p>
+                        <p className="text-emerald-400 text-[11px] font-bold uppercase tracking-widest mb-3">{t('includedLabel')}</p>
                         <ul className="flex flex-col gap-2.5">
                           {included.map(inc => (
                             <li key={inc.id} className="flex items-start gap-2 text-sm text-dt-text-2">
@@ -221,7 +221,7 @@ export default async function TourDetailPage({ params }: Props) {
                     )}
                     {excluded.length > 0 && (
                       <div>
-                        <p className="text-red-400 text-[11px] font-bold uppercase tracking-widest mb-3">No incluido</p>
+                        <p className="text-red-400 text-[11px] font-bold uppercase tracking-widest mb-3">{t('excludedLabel')}</p>
                         <ul className="flex flex-col gap-2.5">
                           {excluded.map(inc => (
                             <li key={inc.id} className="flex items-start gap-2 text-sm text-dt-text-2">
@@ -340,15 +340,15 @@ export default async function TourDetailPage({ params }: Props) {
                       </svg>
                     </div>
                     <div className="flex-1">
-                      <p className="text-red-400 text-xs font-bold">{offer.label} · -{offer.discountPercent}% descuento</p>
-                      <p className="text-red-300/60 text-[11px]">Válido hasta {fmtDate(offer.endsAt)}</p>
+                      <p className="text-red-400 text-xs font-bold">{offer.label} · {t('offerDiscount', { pct: offer.discountPercent })}</p>
+                      <p className="text-red-300/60 text-[11px]">{t('offerValidUntil', { date: fmtDate(offer.endsAt, locale) })}</p>
                     </div>
                   </div>
                   {offerAdult !== null && (
                     <div className="mt-2 pt-2 border-t border-red-500/15 flex items-center gap-2">
                       <span className="text-dt-text-3 text-sm line-through">${priceAdult}</span>
                       <span className="text-white font-bold text-lg">${offerAdult}</span>
-                      <span className="text-dt-text-3 text-xs">USD / adulto</span>
+                      <span className="text-dt-text-3 text-xs">{t('pricePerAdult')}</span>
                     </div>
                   )}
                 </div>
