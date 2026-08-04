@@ -1,29 +1,39 @@
 'use client'
 import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { useLocale, useTranslations } from 'next-intl'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { useSession, signIn } from 'next-auth/react'
 import { useCart } from '@/lib/cart-store'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
-const SUB_NAV = [
-  { label: 'Lugares que ver',      href: '/excursiones' },
-  { label: 'Cosas que hacer',      href: '/excursiones' },
-  { label: 'Inspiración de viaje', href: '/nosotros'    },
-] as const
+export interface ZoneNav { name: string; count: number; image: string | null }
+export interface CatNav  { id: number; name: string; slug: string }
 
-export function Navbar() {
+const CAT_COLORS = ['#0369a1','#0891b2','#1d4ed8','#15803d','#b45309','#7c3aed','#be185d','#0f766e','#c2410c']
+const catColor = (name: string) => CAT_COLORS[name.charCodeAt(0) % CAT_COLORS.length]
+
+type DD = 'lugares' | 'hacer'
+
+interface Props {
+  zones?:      ZoneNav[]
+  categories?: CatNav[]
+}
+
+export function Navbar({ zones = [], categories = [] }: Props) {
   const t        = useTranslations('nav')
   const locale   = useLocale()
   const pathname = usePathname()
   const router   = useRouter()
+
   const [mobileOpen, setMobileOpen] = useState(false)
   const [search, setSearch]         = useState('')
+  const [activeDD, setActiveDD]     = useState<DD | null>(null)
+  const closeTimer                  = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { data: session }           = useSession()
   const { items }                   = useCart()
 
-  useEffect(() => { setMobileOpen(false) }, [pathname])
+  useEffect(() => { setMobileOpen(false); setActiveDD(null) }, [pathname])
 
   const switchLocale = () => router.replace(pathname, { locale: locale === 'es' ? 'en' : 'es' })
 
@@ -32,8 +42,12 @@ export function Navbar() {
     if (search.trim()) router.push(`/excursiones?q=${encodeURIComponent(search.trim())}`)
   }
 
-  const subActive = (href: string) =>
-    href === '/nosotros' ? pathname === '/nosotros' : pathname.startsWith('/excursiones')
+  const openDD = (key: DD) => {
+    if (closeTimer.current) clearTimeout(closeTimer.current)
+    setActiveDD(key)
+  }
+  const scheduleClose = () => { closeTimer.current = setTimeout(() => setActiveDD(null), 150) }
+  const closeDD = () => { if (closeTimer.current) clearTimeout(closeTimer.current); setActiveDD(null) }
 
   return (
     <>
@@ -47,7 +61,6 @@ export function Navbar() {
             Dominicana<span className="text-accent">Tour</span>
           </Link>
 
-          {/* Search — desktop */}
           <form onSubmit={handleSearch} className="hidden md:flex relative flex-1 max-w-sm">
             <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dt-text-3 pointer-events-none shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
@@ -63,10 +76,11 @@ export function Navbar() {
 
           <div className="hidden md:block flex-1" />
 
-          {/* Right actions — desktop */}
           <div className="hidden md:flex items-center gap-1.5">
-            <button onClick={switchLocale}
-              className="text-[12px] font-bold px-2.5 py-1 rounded border border-dt-border text-dt-text-3 hover:text-dt-text hover:border-dt-text-3 transition-all tracking-wide">
+            <button
+              onClick={switchLocale}
+              className="text-[12px] font-bold px-2.5 py-1 rounded border border-dt-border text-dt-text-3 hover:text-dt-text hover:border-dt-text-3 transition-all tracking-wide"
+            >
               {t('langSwitch')}
             </button>
             <ThemeToggle />
@@ -103,7 +117,7 @@ export function Navbar() {
             </Link>
           </div>
 
-          {/* Mobile right */}
+          {/* Mobile */}
           <div className="md:hidden flex items-center gap-1 ml-auto">
             <ThemeToggle />
             <button onClick={() => setMobileOpen(!mobileOpen)}
@@ -118,29 +132,142 @@ export function Navbar() {
         {/* ── Sub-nav row ── */}
         <div className="hidden md:block border-t border-dt-border">
           <div className="max-w-[1400px] mx-auto px-4 sm:px-6 flex items-stretch h-10">
-            {SUB_NAV.map(item => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={cn(
-                  'flex items-center px-4 text-[13px] font-medium border-b-2 transition-colors',
-                  subActive(item.href) && pathname === item.href
-                    ? 'border-accent text-dt-text'
-                    : subActive(item.href) && item.href !== '/nosotros'
-                    ? 'border-accent text-dt-text'
-                    : pathname === item.href
-                    ? 'border-accent text-dt-text'
-                    : 'border-transparent text-dt-text-3 hover:text-dt-text hover:border-dt-border',
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+
+            <button
+              onMouseEnter={() => openDD('lugares')}
+              onMouseLeave={scheduleClose}
+              className={cn(
+                'flex items-center gap-1 px-4 text-[13px] font-medium border-b-2 transition-colors',
+                activeDD === 'lugares' || pathname.startsWith('/excursiones')
+                  ? 'border-accent text-dt-text'
+                  : 'border-transparent text-dt-text-3 hover:text-dt-text hover:border-dt-border',
+              )}
+            >
+              Lugares que ver
+              <svg className={cn('w-3 h-3 shrink-0 transition-transform duration-200', activeDD === 'lugares' && 'rotate-180')} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+
+            <button
+              onMouseEnter={() => openDD('hacer')}
+              onMouseLeave={scheduleClose}
+              className={cn(
+                'flex items-center gap-1 px-4 text-[13px] font-medium border-b-2 transition-colors',
+                activeDD === 'hacer' || pathname.startsWith('/excursiones')
+                  ? 'border-accent text-dt-text'
+                  : 'border-transparent text-dt-text-3 hover:text-dt-text hover:border-dt-border',
+              )}
+            >
+              Cosas que hacer
+              <svg className={cn('w-3 h-3 shrink-0 transition-transform duration-200', activeDD === 'hacer' && 'rotate-180')} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+
+            <Link href="/nosotros"
+              className={cn(
+                'flex items-center px-4 text-[13px] font-medium border-b-2 transition-colors',
+                pathname === '/nosotros'
+                  ? 'border-accent text-dt-text'
+                  : 'border-transparent text-dt-text-3 hover:text-dt-text hover:border-dt-border',
+              )}>
+              Inspiración de viaje
+            </Link>
+
           </div>
         </div>
       </nav>
 
-      {/* Mobile drawer */}
+      {/* ── Dropdown: Lugares que ver ── */}
+      <div
+        className={cn('dt-dropdown', activeDD === 'lugares' && 'is-open')}
+        onMouseEnter={() => openDD('lugares')}
+        onMouseLeave={scheduleClose}
+      >
+        <div className="max-w-[1400px] mx-auto px-8 py-7">
+          <div className="flex items-center justify-between mb-5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3">Destinos populares</p>
+            <Link href="/excursiones" onClick={closeDD}
+              className="text-[12px] font-semibold text-accent hover:opacity-75 transition-opacity">
+              Ver todos →
+            </Link>
+          </div>
+          {zones.length > 0 ? (
+            <div className="flex gap-4 pb-1">
+              {zones.map(zone => (
+                <Link
+                  key={zone.name}
+                  href={`/excursiones?zone=${encodeURIComponent(zone.name)}`}
+                  onClick={closeDD}
+                  className="group flex-shrink-0 w-[110px]"
+                >
+                  <div className="w-[110px] h-[73px] rounded-[6px] overflow-hidden bg-dt-bg-2 mb-2">
+                    {zone.image
+                      ? <img src={zone.image} alt={zone.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.07]" loading="lazy" />
+                      : <div className="w-full h-full flex items-center justify-center text-white font-black text-xl" style={{ background: catColor(zone.name) }}>{zone.name[0].toUpperCase()}</div>
+                    }
+                  </div>
+                  <p className="text-[13px] font-semibold text-dt-text group-hover:text-accent transition-colors line-clamp-1 mb-0.5">{zone.name}</p>
+                  <p className="text-[11px] text-dt-text-3">{zone.count} {zone.count === 1 ? 'tour' : 'tours'}</p>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[13px] text-dt-text-3">Cargando destinos...</p>
+          )}
+        </div>
+      </div>
+
+      {/* ── Dropdown: Cosas que hacer ── */}
+      <div
+        className={cn('dt-dropdown', activeDD === 'hacer' && 'is-open')}
+        onMouseEnter={() => openDD('hacer')}
+        onMouseLeave={scheduleClose}
+      >
+        <div className="max-w-[1400px] mx-auto px-8 py-7">
+          <div className="flex items-center justify-between mb-5">
+            <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3">Tipos de experiencia</p>
+            <Link href="/excursiones" onClick={closeDD}
+              className="text-[12px] font-semibold text-accent hover:opacity-75 transition-opacity">
+              Ver todas →
+            </Link>
+          </div>
+          {categories.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {categories.map(cat => (
+                <Link
+                  key={cat.id}
+                  href={`/excursiones?cat=${cat.slug}`}
+                  onClick={closeDD}
+                  className="group flex items-center gap-2.5 px-4 py-2.5 rounded-lg border border-dt-border bg-dt-bg-2 hover:border-accent/30 hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all"
+                >
+                  <div
+                    className="w-[30px] h-[30px] rounded-[7px] flex items-center justify-center text-white text-[12px] font-black shrink-0"
+                    style={{ background: catColor(cat.name) }}
+                  >
+                    {cat.name[0].toUpperCase()}
+                  </div>
+                  <span className="text-[13px] font-semibold text-dt-text group-hover:text-accent transition-colors whitespace-nowrap">
+                    {cat.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[13px] text-dt-text-3">Cargando categorías...</p>
+          )}
+        </div>
+      </div>
+
+      {/* Overlay — close on click outside */}
+      <div
+        className={cn('dt-overlay', activeDD && 'is-open')}
+        onClick={closeDD}
+        aria-hidden="true"
+      />
+
+      {/* ── Mobile drawer ── */}
       <div className={cn(
         'fixed inset-0 z-40 md:hidden flex flex-col bg-dt-bg transition-all duration-300',
         mobileOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none',
@@ -159,15 +286,20 @@ export function Navbar() {
               className="w-full pl-9 pr-4 py-3 text-sm rounded-xl border border-dt-border bg-dt-bg-2 text-dt-text placeholder:text-dt-text-3 focus:outline-none"
             />
           </form>
-          {SUB_NAV.map(item => (
-            <Link key={item.label} href={item.href}
-              className={cn(
-                'text-2xl font-display font-bold py-4 border-b border-dt-border transition-colors',
-                pathname === item.href ? 'text-accent' : 'text-dt-text hover:text-accent',
-              )}>
-              {item.label}
-            </Link>
-          ))}
+
+          <Link href="/excursiones"
+            className={cn('text-2xl font-display font-bold py-4 border-b border-dt-border transition-colors', pathname.startsWith('/excursiones') ? 'text-accent' : 'text-dt-text hover:text-accent')}>
+            Lugares que ver
+          </Link>
+          <Link href="/excursiones"
+            className={cn('text-2xl font-display font-bold py-4 border-b border-dt-border transition-colors', pathname.startsWith('/excursiones') ? 'text-accent' : 'text-dt-text hover:text-accent')}>
+            Cosas que hacer
+          </Link>
+          <Link href="/nosotros"
+            className={cn('text-2xl font-display font-bold py-4 border-b border-dt-border transition-colors', pathname === '/nosotros' ? 'text-accent' : 'text-dt-text hover:text-accent')}>
+            Inspiración de viaje
+          </Link>
+
           <div className="mt-auto pt-8 flex flex-col gap-3">
             <Link href="/excursiones"
               className="flex items-center justify-center bg-accent text-white font-bold py-3.5 rounded-lg text-base hover:bg-accent/90 transition-colors">
