@@ -7,12 +7,11 @@ import { HeroSearch } from '@/components/ui/HeroSearch'
 import type { ApiProduct, ApiCategory } from '@/components/catalog/ExcursionesClient'
 import type { Metadata } from 'next'
 import { getSiteConfig } from '@/lib/site-config'
+import { getTranslations } from 'next-intl/server'
 
-export const metadata: Metadata = {
-  title: 'Dominicana Tour | Operadora Turística #1 en República Dominicana',
-  description:
-    'Somos la operadora turística #1 en República Dominicana. Excursiones auténticas con guías locales certificados en las 32 provincias. Grupos pequeños, transporte incluido y cancelación flexible.',
-}
+const BASE_URL = 'https://dominicanatour.com'
+
+interface Props { params: Promise<{ locale: string }> }
 
 interface ZoneData { name: string; count: number; image: string | null }
 
@@ -21,7 +20,6 @@ async function getData() {
     const res = await fetchApi<{ data: { products: ApiProduct[]; categories: ApiCategory[] } }>('/catalog')
     const { products, categories } = res.data
 
-    // Group products by zone — pick first cover image per zone
     const zoneMap = new Map<string, ZoneData>()
     products.forEach(p => {
       if (!p.departure_zone) return
@@ -31,12 +29,10 @@ async function getData() {
     })
     const zones: ZoneData[] = [...zoneMap.values()].sort((a, b) => b.count - a.count)
 
-    // Ranking: featured first, then by price desc
     const ranking = [...products]
       .sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0) || Number(b.price_adult) - Number(a.price_adult))
       .slice(0, 10)
 
-    // Highlights: featured tours for the attr grid
     const featured = products.filter(p => p.featured)
     const highlights = featured.length >= 4 ? featured : products.slice(0, 8)
 
@@ -49,7 +45,6 @@ async function getData() {
 function ZoneInitials({ name }: { name: string }) {
   const words = name.split(' ').filter(Boolean)
   const initials = words.length >= 2 ? words[0][0] + words[1][0] : name.slice(0, 2)
-  // Deterministic color from name
   const colors = ['#0369a1','#0891b2','#1d4ed8','#15803d','#b45309','#7c3aed','#be185d','#0f766e']
   const idx = name.charCodeAt(0) % colors.length
   return (
@@ -69,8 +64,42 @@ function CatInitials({ name }: { name: string }) {
   )
 }
 
-export default async function LandingPage() {
-  const [{ categories, zones, ranking, highlights }, config] = await Promise.all([getData(), getSiteConfig()])
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'meta' })
+  const isEn = locale === 'en'
+
+  return {
+    title: t('homeTitle'),
+    description: t('homeDescription'),
+    openGraph: {
+      type: 'website',
+      locale: isEn ? 'en_US' : 'es_DO',
+      alternateLocale: isEn ? ['es_DO'] : ['en_US'],
+      url: isEn ? `${BASE_URL}/en` : BASE_URL,
+      siteName: 'Dominicana Tour',
+      title: t('homeTitle'),
+      description: t('homeDescription'),
+      images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'Dominicana Tour' }],
+    },
+    alternates: {
+      canonical: isEn ? `${BASE_URL}/en` : BASE_URL,
+      languages: {
+        'es': BASE_URL,
+        'en': `${BASE_URL}/en`,
+        'x-default': BASE_URL,
+      },
+    },
+  }
+}
+
+export default async function LandingPage({ params }: Props) {
+  const { locale } = await params
+  const [{ categories, zones, ranking, highlights }, config, t] = await Promise.all([
+    getData(),
+    getSiteConfig(),
+    getTranslations({ locale, namespace: 'home' }),
+  ])
 
   return (
     <>
@@ -78,7 +107,7 @@ export default async function LandingPage() {
       <section className="dt-sec px-4 sm:px-6 py-20 sm:py-24 text-center">
         <div className="max-w-[640px] mx-auto">
           <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-dt-text-3 mb-[18px]">
-            República Dominicana · Operadora oficial
+            {t('eyebrow')}
           </p>
           <h1
             className="font-display font-extrabold text-[clamp(32px,4.8vw,54px)] leading-[1.08] tracking-[-0.03em] text-dt-text mb-[14px]"
@@ -99,15 +128,14 @@ export default async function LandingPage() {
           <div className="max-w-[1400px] mx-auto px-4 sm:px-8">
             <div className="flex items-end justify-between gap-3 mb-7">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3 mb-1.5">Destinos</p>
-                <h2 className="text-[22px] font-extrabold tracking-[-0.022em] leading-[1.2] text-dt-text">Actividades dondequiera que vayas</h2>
+                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3 mb-1.5">{t('destinosEyebrow')}</p>
+                <h2 className="text-[22px] font-extrabold tracking-[-0.022em] leading-[1.2] text-dt-text">{t('destinosTitle')}</h2>
               </div>
               <Link href="/excursiones" className="text-[13px] font-semibold text-accent hover:opacity-75 transition-opacity whitespace-nowrap hidden sm:block">
-                Ver todos →
+                {t('destinosLink')}
               </Link>
             </div>
 
-            {/* Scroll with fade edges */}
             <div className="relative">
               <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-dt-surface to-transparent z-10 pointer-events-none" />
               <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-dt-surface to-transparent z-10 pointer-events-none" />
@@ -141,8 +169,8 @@ export default async function LandingPage() {
         <section className="dt-sec py-[52px] px-4 sm:px-8">
           <div className="max-w-[1400px] mx-auto">
             <div className="mb-7">
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3 mb-1.5">Experiencias</p>
-              <h2 className="text-[22px] font-extrabold tracking-[-0.022em] leading-[1.2] text-dt-text">¿Qué tipo de experiencia buscas?</h2>
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3 mb-1.5">{t('catEyebrow')}</p>
+              <h2 className="text-[22px] font-extrabold tracking-[-0.022em] leading-[1.2] text-dt-text">{t('catTitle')}</h2>
             </div>
             <div className="grid gap-2.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(118px, 1fr))' }}>
               {categories.map(cat => (
@@ -168,11 +196,11 @@ export default async function LandingPage() {
           <div className="max-w-[1400px] mx-auto">
             <div className="flex items-end justify-between gap-3 mb-7">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3 mb-1.5">Las más elegidas</p>
-                <h2 className="text-[22px] font-extrabold tracking-[-0.022em] leading-[1.2] text-dt-text">Actividades más populares</h2>
+                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3 mb-1.5">{t('rankingEyebrow')}</p>
+                <h2 className="text-[22px] font-extrabold tracking-[-0.022em] leading-[1.2] text-dt-text">{t('rankingTitle')}</h2>
               </div>
               <Link href="/excursiones" className="text-[13px] font-semibold text-accent hover:opacity-75 transition-opacity whitespace-nowrap hidden sm:block">
-                Ver todas →
+                {t('rankingLink')}
               </Link>
             </div>
             <div className="flex flex-col">
@@ -212,7 +240,7 @@ export default async function LandingPage() {
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-[10px] text-dt-text-3 mb-0.5">Desde</p>
+                    <p className="text-[10px] text-dt-text-3 mb-0.5">{t('rankingFrom')}</p>
                     <p className="text-[15px] font-extrabold tabular-nums text-dt-text">${Number(tour.price_adult).toFixed(0)} <span className="text-xs font-normal text-dt-text-3">USD</span></p>
                   </div>
                 </Link>
@@ -228,15 +256,15 @@ export default async function LandingPage() {
           <div className="max-w-[1400px] mx-auto">
             <div className="flex items-end justify-between gap-3 mb-7">
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3 mb-1.5">Atracciones</p>
-                <h2 className="text-[22px] font-extrabold tracking-[-0.022em] leading-[1.2] text-dt-text">Que no te puedes perder</h2>
+                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3 mb-1.5">{t('atrEyebrow')}</p>
+                <h2 className="text-[22px] font-extrabold tracking-[-0.022em] leading-[1.2] text-dt-text">{t('atrTitle')}</h2>
               </div>
               <Link href="/excursiones" className="text-[13px] font-semibold text-accent hover:opacity-75 transition-opacity whitespace-nowrap hidden sm:block">
-                Ver todas →
+                {t('atrLink')}
               </Link>
             </div>
             <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))' }}>
-              {highlights.map(t => <TourCard key={t.id} tour={t} />)}
+              {highlights.map(tour => <TourCard key={tour.id} tour={tour} />)}
             </div>
           </div>
         </section>

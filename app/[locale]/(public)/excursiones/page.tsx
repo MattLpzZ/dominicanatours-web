@@ -3,14 +3,35 @@ import { fetchApi } from '@/lib/api'
 import type { Metadata } from 'next'
 import type { ApiProduct, ApiCategory } from '@/components/catalog/ExcursionesClient'
 import { ExcursionesClient } from '@/components/catalog/ExcursionesClient'
+import { getTranslations } from 'next-intl/server'
 
-export const metadata: Metadata = {
-  title: 'Excursiones en República Dominicana | Dominicana Tour',
-  description: 'Más de 20 excursiones únicas en toda República Dominicana. Filtra por destino, categoría y precio.',
-}
+const BASE_URL = 'https://dominicanatour.com'
 
 interface Props {
+  params: Promise<{ locale: string }>
   searchParams: Promise<{ cat?: string; diff?: string; zone?: string; sort?: string; q?: string; maxPrice?: string; duration?: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: 'meta' })
+  const isEn = locale === 'en'
+  const path = '/excursiones'
+  return {
+    title: t('toursTitle'),
+    description: t('toursDescription'),
+    alternates: {
+      canonical: isEn ? `${BASE_URL}/en${path}` : `${BASE_URL}${path}`,
+      languages: {
+        'es': `${BASE_URL}${path}`,
+        'en': `${BASE_URL}/en${path}`,
+        'x-default': `${BASE_URL}${path}`,
+      },
+    },
+    openGraph: {
+      locale: isEn ? 'en_US' : 'es_DO',
+    },
+  }
 }
 
 

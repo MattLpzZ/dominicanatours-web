@@ -149,10 +149,27 @@
     "imgAlt": "Cascadas en República Dominicana"
   },
   "meta": {
-    "homeTitle": "Dominicana Tour — Operadora Turística Nacional",
-    "homeDescription": "Somos la operadora turística líder en República Dominicana. Más de 20 excursiones auténticas con guías locales certificados.",
+    "homeTitle": "Tours y Excursiones en República Dominicana | Dominicana Tour",
+    "homeDescription": "Reserva excursiones auténticas en República Dominicana con guías locales certificados. Grupos pequeños, transporte puerta a puerta y cancelación gratuita hasta 48h. Desde $35 USD.",
     "toursTitle": "Excursiones en República Dominicana | Dominicana Tour",
-    "toursDescription": "Más de 20 excursiones únicas en toda República Dominicana. Explora el mapa y filtra por destino, dificultad y precio.",
-    "bookTitle": "Reservar — Dominicana Tour"
+    "toursDescription": "Más de 20 excursiones únicas en toda República Dominicana. Filtra por destino, tipo de actividad y presupuesto. Traslados incluidos en todos los tours.",
+    "bookTitle": "Reservar — Dominicana Tour",
+    "mapTitle": "Mapa de Excursiones · República Dominicana | Dominicana Tour",
+    "mapDescription": "Explora las excursiones disponibles en el mapa interactivo de República Dominicana. Filtra por zona y descubre tours cerca de tu hotel."
+  },
+  "home": {
+    "eyebrow": "República Dominicana · Operadora oficial",
+    "destinosEyebrow": "Destinos",
+    "destinosTitle": "Actividades dondequiera que vayas",
+    "destinosLink": "Ver todos →",
+    "catEyebrow": "Experiencias",
+    "catTitle": "¿Qué tipo de experiencia buscas?",
+    "rankingEyebrow": "Las más elegidas",
+    "rankingTitle": "Actividades más populares",
+    "rankingLink": "Ver todas →",
+    "rankingFrom": "Desde",
+    "atrEyebrow": "Atracciones",
+    "atrTitle": "Que no te puedes perder",
+    "atrLink": "Ver todas →"
   }
 }

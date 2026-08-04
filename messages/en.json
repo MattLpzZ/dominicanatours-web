@@ -149,10 +149,27 @@
     "imgAlt": "Waterfalls in the Dominican Republic"
   },
   "meta": {
-    "homeTitle": "Dominicana Tour — National Tour Operator",
-    "homeDescription": "We are the leading tour operator in the Dominican Republic. Over 20 authentic excursions with certified local guides.",
+    "homeTitle": "Dominican Republic Tours & Excursions | Dominicana Tour",
+    "homeDescription": "Book authentic tours in the Dominican Republic with certified local guides. Small groups, door-to-door transfers and free cancellation up to 48h before. From $35 USD.",
     "toursTitle": "Tours in the Dominican Republic | Dominicana Tour",
-    "toursDescription": "Over 20 unique tours across the Dominican Republic. Explore the map and filter by destination, difficulty, and price.",
-    "bookTitle": "Book — Dominicana Tour"
+    "toursDescription": "Browse 20+ unique excursions across all provinces of the Dominican Republic. Filter by destination, activity type, and budget. Transfers included on every tour.",
+    "bookTitle": "Book a Tour — Dominicana Tour",
+    "mapTitle": "Tour Map · Dominican Republic | Dominicana Tour",
+    "mapDescription": "Explore available tours on the interactive map of the Dominican Republic. Filter by zone and discover excursions near your hotel."
+  },
+  "home": {
+    "eyebrow": "Dominican Republic · Official Operator",
+    "destinosEyebrow": "Destinations",
+    "destinosTitle": "Activities wherever you go",
+    "destinosLink": "View all →",
+    "catEyebrow": "Experiences",
+    "catTitle": "What kind of experience are you looking for?",
+    "rankingEyebrow": "Most chosen",
+    "rankingTitle": "Most popular activities",
+    "rankingLink": "View all →",
+    "rankingFrom": "From",
+    "atrEyebrow": "Attractions",
+    "atrTitle": "Not to be missed",
+    "atrLink": "View all →"
   }
 }

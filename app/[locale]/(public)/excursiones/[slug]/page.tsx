@@ -40,15 +40,29 @@ function fmtDate(d: Date) {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params
+  const { slug, locale } = await params
+  const BASE_URL = 'https://dominicanatour.com'
+  const isEn = locale === 'en'
+  const path = `/excursiones/${slug}`
   try {
     const res = await fetchApi<{ data: ApiProductDetail }>(`/catalog/${slug}`)
     const tour = res.data
     return {
       title: tour.name,
       description: tour.subtitle,
+      alternates: {
+        canonical: isEn ? `${BASE_URL}/en${path}` : `${BASE_URL}${path}`,
+        languages: {
+          'es': `${BASE_URL}${path}`,
+          'en': `${BASE_URL}/en${path}`,
+          'x-default': `${BASE_URL}${path}`,
+        },
+      },
       openGraph: {
-        title: tour.name, description: tour.subtitle ?? undefined, type: 'website',
+        title: tour.name,
+        description: tour.subtitle ?? undefined,
+        type: 'website',
+        locale: isEn ? 'en_US' : 'es_DO',
         images: tour.images[0] ? [{ url: tour.images[0].url, width: 1200, height: 630, alt: tour.name }] : [],
       },
     }
