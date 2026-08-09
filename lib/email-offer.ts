@@ -1,9 +1,18 @@
-import { Resend } from 'resend'
+import nodemailer from 'nodemailer'
 
-let _resend: Resend | null = null
-function getResend() { return (_resend ??= new Resend(process.env.RESEND_API_KEY)) }
+function getTransport() {
+  return nodemailer.createTransport({
+    host:   process.env.SMTP_HOST ?? '172.18.0.1',
+    port:   Number(process.env.SMTP_PORT ?? 25),
+    secure: false,
+    ...(process.env.SMTP_USER
+      ? { auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS ?? process.env.SMTP_USER } }
+      : {}),
+    tls: { rejectUnauthorized: false },
+  })
+}
 
-const FROM = 'Dominicana Tour <reservas@leymaken.com>'
+const FROM = process.env.SMTP_FROM ?? 'Dominicana Tour <noreply@mail.dynastydom.com>'
 
 export interface OfferEmailData {
   tourName:        string
@@ -86,7 +95,7 @@ export async function sendOfferAlert(
   const body = html(data)
   for (const sub of subscribers) {
     try {
-      await getResend().emails.send({ from: FROM, to: sub.email, subject, html: body })
+      await getTransport().sendMail({ from: FROM, to: sub.email, subject, html: body })
       sent++
     } catch { failed++ }
   }

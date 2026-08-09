@@ -45,7 +45,7 @@ export async function POST(req: NextRequest) {
       intent: 'CAPTURE',
       purchase_units: [{
         amount: { currency_code: 'USD', value: Number(depositAmount).toFixed(2) },
-        description: `Anticipo 20% · ${bookingData.product_name ?? 'Excursión'}`,
+        description: `Anticipo 30% · ${bookingData.product_name ?? 'Excursión'}`,
         custom_id: pendingId,
       }],
       application_context: {

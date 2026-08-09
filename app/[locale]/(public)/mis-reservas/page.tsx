@@ -14,14 +14,15 @@ export default function MisReservasPage() {
     setLoading(true)
     setError('')
     try {
-      const res = await fetch(`/api/admin/reservas?code=${c}`, { credentials: 'include' })
+      const apiBase = process.env.NEXT_PUBLIC_API_URL ?? 'https://dominicantour.leymaken.com/api'
+      const res = await fetch(`${apiBase}/bookings/${c}`)
       if (res.ok) {
         window.location.href = `/reserva/${c}`
       } else {
-        setError('No encontramos una reserva con ese codigo. Verifica el email de confirmacion.')
+        setError('No encontramos una reserva con ese código. Verifica el email de confirmación.')
       }
     } catch {
-      setError('Error de conexion. Intenta de nuevo.')
+      setError('Error de conexión. Intenta de nuevo.')
     } finally {
       setLoading(false)
     }

@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic"
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminSession } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
+import { sendBookingConfirmed } from '@/lib/email'
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getAdminSession()
@@ -15,6 +16,23 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       ...(internalNotes !== undefined ? { internalNotes } : {}),
       ...(paidDeposit !== undefined ? { paidDeposit } : {}),
     },
+    include: {
+      tour:     { select: { name: true } },
+      tourDate: { select: { date: true } },
+    },
   })
+
+  if (status === 'CONFIRMED' && updated.email) {
+    sendBookingConfirmed({
+      code:      updated.code,
+      firstName: updated.firstName,
+      email:     updated.email,
+      tourName:  updated.tour?.name ?? 'Excursión',
+      tourDate:  updated.tourDate?.date
+        ? new Date(updated.tourDate.date).toISOString().slice(0, 10)
+        : null,
+    }).catch(() => {})
+  }
+
   return NextResponse.json({ ok: true, reserva: updated })
 }

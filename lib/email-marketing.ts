@@ -1,8 +1,13 @@
-import { Resend } from 'resend'
+import nodemailer from 'nodemailer'
 
-let _resend: Resend | null = null
-
-export function getResend(): Resend | null {
-  if (!process.env.RESEND_API_KEY) return null
-  return (_resend ??= new Resend(process.env.RESEND_API_KEY))
+export function getTransport() {
+  return nodemailer.createTransport({
+    host:   process.env.SMTP_HOST ?? '172.18.0.1',
+    port:   Number(process.env.SMTP_PORT ?? 25),
+    secure: false,
+    ...(process.env.SMTP_USER
+      ? { auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS ?? process.env.SMTP_USER } }
+      : {}),
+    tls: { rejectUnauthorized: false },
+  })
 }

@@ -35,7 +35,7 @@ const SECTIONS: {
     ],
   },
   {
-    label: 'Cat?logo',
+    label: 'Catálogo',
     items: [
       { href: '/admin/tours',   label: 'Tours',   icon: ICONS.tours   },
       { href: '/admin/ofertas', label: 'Ofertas', icon: ICONS.ofertas },
@@ -44,7 +44,7 @@ const SECTIONS: {
     ],
   },
   {
-    label: 'Atenci?n',
+    label: 'Atención',
     items: [
       { href: '/admin/reservas',  label: 'Reservas',  icon: ICONS.reservas  },
       { href: '/admin/clientes',  label: 'Clientes',  icon: 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z'  },
@@ -124,10 +124,10 @@ export default function AdminSidebar() {
         ))}
       </nav>
 
-      {/* Bottom fixed ? Configuraci?n + user + logout */}
+      {/* Bottom fixed ? Configuración + user + logout */}
       <div className="shrink-0 border-t border-dt-border">
 
-        {/* Configuraci?n pinned */}
+        {/* Configuración pinned */}
         <div className="px-2 pt-2">
           <div>
             <Link href="/admin/configuracion"
@@ -138,10 +138,10 @@ export default function AdminSidebar() {
                   : 'text-dt-text-3 hover:bg-dt-bg-2 hover:text-dt-text',
               ].join(' ')}>
               <Ico d={ICONS.settings} />
-              Configuraci?n
+              Configuración
             </Link>
 
-            {/* Personalizaci?n sub-item */}
+            {/* Personalización sub-item */}
             {onConfig && (
               <Link href="/admin/personalizacion"
                 className={[
@@ -153,7 +153,7 @@ export default function AdminSidebar() {
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
                   <path d={ICONS.personalizar} />
                 </svg>
-                Personalizaci?n
+                Personalización
               </Link>
             )}
           </div>
@@ -177,7 +177,7 @@ export default function AdminSidebar() {
           <button onClick={logout}
             className="flex items-center gap-2.5 w-full px-3 py-[7px] rounded-md text-[13px] border-none cursor-pointer bg-transparent text-dt-text-3 hover:bg-red-500/5 hover:text-red-500 transition-colors">
             <Ico d={ICONS.logout} />
-            Cerrar sesi?n
+            Cerrar sesión
           </button>
         </div>
 

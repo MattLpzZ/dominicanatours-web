@@ -1,5 +1,6 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
+import { useSearchParams } from 'next/navigation'
 
 type Reserva = {
   id: number; code: string; status: string
@@ -59,6 +60,7 @@ function Row({ label, value, mono, bold, accent }: {
 }
 
 export default function ReservasClient() {
+  const searchParams = useSearchParams()
   const today = new Date()
   const [year,  setYear]  = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth()) // 0-indexed
@@ -67,6 +69,7 @@ export default function ReservasClient() {
   const [reservas,  setReservas]  = useState<Reserva[]>([])
   const [loading,   setLoading]   = useState(true)
   const [search,    setSearch]    = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
   const [updating,  setUpdating]  = useState<number | null>(null)
 
   // Panel
@@ -75,6 +78,8 @@ export default function ReservasClient() {
   const [panelView,      setPanelView]      = useState<'day' | 'detail'>('day')
   const [editNotes,      setEditNotes]      = useState('')
   const [savingNotes,    setSavingNotes]    = useState(false)
+
+  const didInit = useRef(false)
 
   const fetchMonth = useCallback(async (y: number, m: number) => {
     setLoading(true)
@@ -89,6 +94,22 @@ export default function ReservasClient() {
   }, [])
 
   useEffect(() => { fetchMonth(year, month) }, [year, month, fetchMonth])
+
+  // Read URL params once on mount to support dashboard deep-links
+  useEffect(() => {
+    if (didInit.current) return
+    didInit.current = true
+    const paramStatus = searchParams.get('status')
+    const paramCode   = searchParams.get('code')
+    if (paramStatus) {
+      setView('list')
+      setStatusFilter(paramStatus)
+    }
+    if (paramCode) {
+      setView('list')
+      setSearch(paramCode)
+    }
+  }, [searchParams])
 
   function prevMonth() {
     if (month === 0) { setYear(y => y - 1); setMonth(11) }
@@ -166,12 +187,12 @@ export default function ReservasClient() {
   const dayReservas = selectedDay ? (byDate[selectedDay] ?? []) : []
 
   // List view filtered
-  const listFiltered = search.trim()
-    ? reservas.filter(r =>
-        `${r.firstName} ${r.lastName} ${r.code} ${r.tour.name} ${r.email} ${r.phone}`
-          .toLowerCase().includes(search.toLowerCase())
-      )
-    : reservas
+  const listFiltered = reservas.filter(r => {
+    if (statusFilter && r.status !== statusFilter) return false
+    if (!search.trim()) return true
+    return `${r.firstName} ${r.lastName} ${r.code} ${r.tour.name} ${r.email} ${r.phone}`
+      .toLowerCase().includes(search.toLowerCase())
+  })
 
   const panelOpen = selectedDay !== null
 

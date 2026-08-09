@@ -18,21 +18,26 @@ export function ReviewModal({ tourId, tourName, firstName, country, reservationC
   const [comment, setComment] = useState('')
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
+  const [submitError, setSubmitError] = useState('')
 
   async function submit(e: React.FormEvent) {
     e.preventDefault()
     if (!comment.trim() || rating < 1) return
     setLoading(true)
+    setSubmitError('')
     try {
-      await fetch(`${API}/reviews`, {
+      const res = await fetch(`${API}/reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tour_id: tourId, reservation_code: reservationCode, firstName, country, rating, comment, language: 'es' }),
       })
-      setDone(true)
+      if (res.ok) {
+        setDone(true)
+      } else {
+        setSubmitError('No se pudo enviar la reseña. Intenta de nuevo.')
+      }
     } catch {
-      // silent — review saved anyway
-      setDone(true)
+      setSubmitError('Error de conexión. Intenta de nuevo.')
     } finally {
       setLoading(false)
     }
@@ -123,6 +128,9 @@ export function ReviewModal({ tourId, tourName, firstName, country, reservationC
                 />
                 <p className="text-[11px] text-dt-text-3 text-right mt-1">{comment.length}/500</p>
               </div>
+              {submitError && (
+                <p className="text-red-400 text-xs mb-3 bg-red-500/8 border border-red-500/15 px-3 py-2 rounded-lg">{submitError}</p>
+              )}
               <button
                 type="submit"
                 disabled={loading || !comment.trim()}

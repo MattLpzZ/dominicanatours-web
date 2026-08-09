@@ -77,7 +77,7 @@ function html(d: BookingEmailData): string {
           ${row('Fecha', `<span style="text-transform:capitalize">${fecha}</span>`)}
           ${row('Personas', pax)}
           ${row('Total', `$${d.totalAmount} USD`, true)}
-          ${row('Anticipo hoy', `$${d.depositAmount} USD (20%)`)}
+          ${row('Anticipo hoy', `$${d.depositAmount} USD (30%)`)}
           ${row('Método de pago', METHOD[d.paymentMethod] ?? d.paymentMethod)}
         </table>
       </div>
@@ -125,5 +125,96 @@ export async function sendBookingConfirmation(data: BookingEmailData): Promise<v
     to:      data.email,
     subject: `Reserva recibida: ${data.tourName} · ${data.code}`,
     html:    html(data),
+  })
+}
+
+export interface StatusEmailData {
+  code:      string
+  firstName: string
+  email:     string
+  tourName:  string
+  tourDate:  string | null
+}
+
+function confirmedHtml(d: StatusEmailData): string {
+  const fecha = d.tourDate
+    ? new Date(d.tourDate + 'T12:00:00').toLocaleDateString('es-DO',
+        { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    : 'Por confirmar'
+
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1"></head>
+  <body style="margin:0;padding:0;background:#F2F2F2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <div style="max-width:540px;margin:32px auto 48px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07)">
+
+    <div style="background:#111;padding:24px 32px">
+      <span style="font-size:20px;font-weight:900;color:#fff;letter-spacing:-0.5px">Dominicana</span>
+      <span style="font-size:20px;font-weight:900;color:#E85D20;letter-spacing:-0.5px">Tour</span>
+    </div>
+
+    <div style="background:linear-gradient(135deg,#16a34a,#15803d);padding:32px">
+      <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.1em">Reserva confirmada ✓</p>
+      <p style="margin:0;font-size:26px;font-weight:900;color:#fff;line-height:1.15">¡${d.firstName}, tu reserva está confirmada!</p>
+    </div>
+
+    <div style="padding:32px">
+      <p style="margin:0 0 24px;color:#555;font-size:15px;line-height:1.65">
+        Hemos confirmado tu reserva. Te esperamos para vivir una experiencia increíble.
+      </p>
+
+      <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:12px;padding:20px 24px;margin-bottom:28px">
+        <table style="width:100%;border-collapse:collapse">
+          <tr>
+            <td style="padding:8px 0;color:#888;font-size:14px;width:38%">Código</td>
+            <td style="padding:8px 0;font-size:14px;font-weight:700;color:#E85D20">
+              <span style="font-family:monospace;background:#FFF3ED;color:#E85D20;padding:2px 8px;border-radius:4px">${d.code}</span>
+            </td>
+          </tr>
+          <tr style="border-top:1px solid #BBF7D0">
+            <td style="padding:8px 0;color:#888;font-size:14px">Tour</td>
+            <td style="padding:8px 0;font-size:14px;font-weight:500;color:#111">${d.tourName}</td>
+          </tr>
+          <tr style="border-top:1px solid #BBF7D0">
+            <td style="padding:8px 0;color:#888;font-size:14px">Fecha</td>
+            <td style="padding:8px 0;font-size:14px;color:#111;text-transform:capitalize">${fecha}</td>
+          </tr>
+        </table>
+      </div>
+
+      <div style="text-align:center;margin-bottom:28px">
+        <a href="https://dominicanatour.com/reserva/${d.code}"
+           style="display:inline-block;background:#E85D20;color:#fff;font-weight:700;
+                  font-size:15px;padding:14px 36px;border-radius:10px;text-decoration:none">
+          Ver mi reserva →
+        </a>
+      </div>
+
+      <div style="background:#FFF7F4;border-left:3px solid #E85D20;border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:24px">
+        <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#E85D20">Próximos pasos</p>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#666;line-height:1.8">
+          <li>Te contactaremos para coordinar el punto de recogida desde tu hotel</li>
+          <li>El saldo restante se paga el día del tour</li>
+          <li>Cancelación gratuita hasta 48h antes</li>
+        </ul>
+      </div>
+
+      <p style="margin:0;font-size:13px;color:#999;line-height:1.6">
+        ¿Preguntas? Escríbenos por
+        <a href="https://wa.me/18095550100" style="color:#E85D20;text-decoration:none">WhatsApp</a>
+      </p>
+    </div>
+
+    <div style="background:#F5F5F5;padding:16px 32px;text-align:center;border-top:1px solid #E8E8E8">
+      <p style="margin:0;font-size:11px;color:#aaa">© 2026 Dominicana Tour · República Dominicana</p>
+    </div>
+  </div></body></html>`
+}
+
+export async function sendBookingConfirmed(data: StatusEmailData): Promise<void> {
+  await getTransport().sendMail({
+    from:    FROM,
+    to:      data.email,
+    subject: `¡Reserva confirmada! ${data.tourName} · ${data.code}`,
+    html:    confirmedHtml(data),
   })
 }

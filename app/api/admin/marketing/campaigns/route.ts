@@ -2,7 +2,7 @@ export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { getAdminSession } from '@/lib/admin-auth'
 import { prisma } from '@/lib/prisma'
-import { getResend } from '@/lib/email-marketing'
+import { getTransport } from '@/lib/email-marketing'
 
 export async function GET() {
   const session = await getAdminSession()
@@ -48,24 +48,18 @@ export async function POST(req: NextRequest) {
   let sentAt: Date | undefined
 
   if (sendNow && type === 'EMAIL') {
-    const resend = getResend()
-    if (resend) {
-      for (const rec of recipients) {
-        if (!rec.email) continue
-        const personalBody = msgBody.replace(/\{nombre\}/gi, rec.firstName)
-        try {
-          await resend.emails.send({
-            from: 'Dominicana Tour <reservas@leymaken.com>',
-            to: rec.email,
-            subject,
-            html: personalBody,
-          })
-          sentCount++
-        } catch { /* non-fatal */ }
-      }
-      status = 'SENT'
-      sentAt = new Date()
+    const transport = getTransport()
+    const from = process.env.SMTP_FROM ?? 'Dominicana Tour <noreply@mail.dynastydom.com>'
+    for (const rec of recipients) {
+      if (!rec.email) continue
+      const personalBody = msgBody.replace(/\{nombre\}/gi, rec.firstName)
+      try {
+        await transport.sendMail({ from, to: rec.email, subject, html: personalBody })
+        sentCount++
+      } catch { /* non-fatal */ }
     }
+    status = 'SENT'
+    sentAt = new Date()
   } else if (sendNow && type === 'WHATSAPP') {
     // For WA campaigns, just mark as sent (manual sending)
     sentCount = recipients.filter(r => r.phone).length

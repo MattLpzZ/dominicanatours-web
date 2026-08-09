@@ -681,24 +681,55 @@ export function CheckoutClient({ product, initialAdults, initialChildren, initia
     if (!terms) { setError('Acepta los términos y condiciones para continuar'); return }
     setSubmitting(true)
     setError('')
+
+    const bookingPayload = {
+      product_id:      product.id,
+      product_name:    product.name,
+      availability_id: selectedSlotId ?? null,
+      first_name:      firstName.trim(),
+      last_name:       lastName.trim(),
+      email:           email.trim(),
+      phone:           phone.trim(),
+      hotel:           hotel.trim(),
+      adults,
+      children,
+      payment_method:  paymentMethod,
+      notes:           appliedCoupon ? `Cupón: ${appliedCoupon.code}` : null,
+      coupon_code:     appliedCoupon?.code ?? null,
+    }
+
+    // PayPal: redirect to PayPal approval before creating booking
+    if (paymentMethod === 'paypal' && deposit > 0) {
+      try {
+        const res = await fetch('/api/paypal/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bookingData: bookingPayload, depositAmount: deposit }),
+        })
+        const data = await res.json()
+        if (!res.ok) {
+          setError(data.error ?? 'Error al iniciar el pago con PayPal. Intenta de nuevo.')
+          setSubmitting(false)
+          return
+        }
+        if (!data.approvalUrl) {
+          setError('No se recibió la URL de pago de PayPal.')
+          setSubmitting(false)
+          return
+        }
+        window.location.href = data.approvalUrl
+      } catch {
+        setError('Error de conexión con PayPal. Intenta de nuevo.')
+        setSubmitting(false)
+      }
+      return
+    }
+
     try {
       const res = await fetch('/api/reservas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          product_id:      product.id,
-          availability_id: selectedSlotId ?? null,
-          first_name:      firstName.trim(),
-          last_name:       lastName.trim(),
-          email:           email.trim(),
-          phone:           phone.trim(),
-          hotel:           hotel.trim(),
-          adults,
-          children,
-          payment_method:  paymentMethod,
-          notes:           appliedCoupon ? `Cupón: ${appliedCoupon.code}` : null,
-          coupon_code:     appliedCoupon?.code ?? null,
-        }),
+        body: JSON.stringify(bookingPayload),
       })
       const json = await res.json()
       if (!res.ok) {
