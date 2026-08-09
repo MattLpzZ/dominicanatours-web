@@ -1,9 +1,12 @@
 import type { Metadata } from 'next'
 import { Bricolage_Grotesque, Inter } from 'next/font/google'
 import { ThemeProvider } from 'next-themes'
+import Script from 'next/script'
 import SessionProvider from './session-provider'
 import { EditModeListener } from '@/components/EditModeListener'
 import './globals.css'
+
+const GA_ID = 'G-40LNPXX177'
 
 const bricolage = Bricolage_Grotesque({
   subsets: ['latin'],
@@ -161,6 +164,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <meta name="theme-color" content="#E85D20" media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content="#FF6B35" media="(prefers-color-scheme: dark)" />
         <WebsiteLd />
+        {/* GA Consent Mode v2 — must run before gtag.js loads */}
+        <script dangerouslySetInnerHTML={{ __html:
+          `window.dataLayer=window.dataLayer||[];` +
+          `function gtag(){dataLayer.push(arguments)}` +
+          `gtag('consent','default',{analytics_storage:'denied',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',wait_for_update:500});`
+        }} />
       </head>
       <body>
         <SessionProvider>
@@ -169,6 +178,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             {children}
           </ThemeProvider>
         </SessionProvider>
+        <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+        <Script id="ga-config" strategy="afterInteractive">{`gtag('js',new Date());gtag('config','${GA_ID}');`}</Script>
       </body>
     </html>
   )

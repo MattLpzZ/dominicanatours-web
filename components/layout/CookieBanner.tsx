@@ -34,7 +34,7 @@ const TEXT = {
         name: 'Analítica',
         always: false,
         desc: 'Nos ayudan a entender cómo interactúas con el sitio para mejorar contenidos y experiencia.',
-        examples: 'Google Analytics (_ga, _gid) — pendiente de activación',
+        examples: 'Google Analytics (_ga, _gid)',
       },
     ],
   },
@@ -57,7 +57,7 @@ const TEXT = {
         name: 'Analytics',
         always: false,
         desc: 'Help us understand how you interact with the site so we can improve content and experience.',
-        examples: 'Google Analytics (_ga, _gid) — pending activation',
+        examples: 'Google Analytics (_ga, _gid)',
       },
     ],
   },
@@ -74,13 +74,26 @@ export function CookieBanner() {
     if (!getConsent()) setVisible(true)
   }, [])
 
+  function updateGa(granted: boolean) {
+    const g = (window as any).gtag
+    if (typeof g !== 'function') return
+    g('consent', 'update', {
+      analytics_storage: granted ? 'granted' : 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied',
+    })
+  }
+
   function accept() {
     setConsent('all')
+    updateGa(true)
     setVisible(false)
   }
 
   function decline() {
     setConsent('essential')
+    updateGa(false)
     setVisible(false)
   }
 

@@ -72,7 +72,7 @@ export default function PrivacidadPage() {
                 </div>
                 <p className="text-sm mb-2">Nos permiten entender cómo se utiliza el sitio (páginas visitadas, tiempo de permanencia) para mejorar la experiencia. No contienen información personal identificable.</p>
                 <ul className="list-none space-y-1 text-xs text-dt-text-3 font-mono">
-                  <li><span className="text-dt-text-2">_ga, _gid</span> — Google Analytics (pendiente de activación)</li>
+                  <li><span className="text-dt-text-2">_ga, _gid</span> — Google Analytics (medición de tráfico y comportamiento anónimo)</li>
                 </ul>
                 <p className="text-xs text-dt-text-3 mt-2">Estas cookies solo se activan si aceptas el uso completo al ver el aviso de cookies.</p>
               </div>

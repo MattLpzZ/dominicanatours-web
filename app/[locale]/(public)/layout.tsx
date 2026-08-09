@@ -5,6 +5,7 @@ import { ChatWidget } from '@/components/chat/ChatWidget'
 import { AnimatedMain } from '@/components/ui/AnimatedMain'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
 import { CookieBanner } from '@/components/layout/CookieBanner'
+import { GaConsentRestorer } from '@/components/analytics/GaConsentRestorer'
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -15,6 +16,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <ChatWidget />
       <ScrollReveal />
       <CookieBanner />
+      <GaConsentRestorer />
     </>
   )
 }
