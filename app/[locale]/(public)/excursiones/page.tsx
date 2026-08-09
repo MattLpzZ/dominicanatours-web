@@ -65,7 +65,7 @@ export default async function CatalogPage({ searchParams }: Props) {
   let categories: ApiCategory[] = []
 
   try {
-    const res = await fetchApi<{ data: { products: ApiProduct[]; categories: ApiCategory[] } }>('/catalog')
+    const res = await fetchApi<{ data: { products: ApiProduct[]; categories: ApiCategory[] } }>('/catalog', { next: { revalidate: 300 } })
     products = res.data.products
     categories = res.data.categories
   } catch {

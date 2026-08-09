@@ -1,5 +1,6 @@
-export const dynamic = 'force-dynamic'
+export const revalidate = 60
 import { notFound } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 import { fetchApi } from '@/lib/api'
 import { prisma } from '@/lib/prisma'
@@ -15,6 +16,14 @@ import type { Metadata } from 'next'
 import type { ApiProduct } from '@/components/catalog/ExcursionesClient'
 import { CopyLinkButton } from '@/components/tour/CopyLinkButton'
 
+interface ApiReview {
+  firstName: string; country: string | null; rating: number
+  comment: string | null; language: string; createdAt: string
+}
+interface ApiReviewStats {
+  reviews: ApiReview[]; total: number; avg: number | null
+  distribution: { r5: number; r4: number; r3: number; r12: number }
+}
 interface ApiItineraryItem {
   id: number; time: string | null; title: string; description: string | null; order: number
 }
@@ -79,16 +88,39 @@ export default async function TourDetailPage({ params }: Props) {
     tour = res.data
   } catch { notFound() }
 
-  const offer = await prisma.tourOffer.findFirst({
-    where: { tour: { slug }, active: true, startsAt: { lte: new Date() }, endsAt: { gte: new Date() } },
-    orderBy: { discountPercent: 'desc' },
-  }).catch(() => null)
+  const [offer, allCatalogRes, reviewStatsRes, weatherRaw] = await Promise.all([
+    prisma.tourOffer.findFirst({
+      where: { tour: { slug }, active: true, startsAt: { lte: new Date() }, endsAt: { gte: new Date() } },
+      orderBy: { discountPercent: 'desc' },
+    }).catch(() => null),
+    fetchApi<{ data: { products: ApiProduct[] } }>('/catalog', { next: { revalidate: 300 } }).catch(() => null),
+    fetchApi<ApiReviewStats>(`/catalog/${slug}/reviews`, { cache: 'no-store' }).catch(() => null),
+    tour.departure_zone
+      ? fetch(
+          `https://wttr.in/${encodeURIComponent(tour.departure_zone)},Dominican%20Republic?format=j1`,
+          { next: { revalidate: 3600 }, signal: AbortSignal.timeout(1500) }
+        ).then(r => r.ok ? r.json() : null).catch(() => null)
+      : Promise.resolve(null),
+  ])
 
-  let related: ApiProduct[] = []
-  try {
-    const res = await fetchApi<{ data: { products: ApiProduct[] } }>('/catalog')
-    related = res.data.products.filter(p => p.category?.slug === tour.category?.slug && p.id !== tour.id).slice(0, 3)
-  } catch {}
+  const related: ApiProduct[] = allCatalogRes?.data?.products
+    ?.filter(p => p.category?.slug === tour.category?.slug && p.id !== tour.id)
+    ?.slice(0, 3) ?? []
+
+  const reviewStats: ApiReviewStats = reviewStatsRes ?? { reviews: [], total: 0, avg: null, distribution: { r5: 0, r4: 0, r3: 0, r12: 0 } }
+
+
+
+  const weather = (() => {
+    if (!weatherRaw) return null
+    const c = weatherRaw.current_condition?.[0]
+    if (!c) return null
+    return {
+      tempC: c.temp_C ?? '—', desc: c.weatherDesc?.[0]?.value ?? '',
+      feels: c.FeelsLikeC ?? '—', humidity: c.humidity ?? '—',
+      windKmph: c.windspeedKmph ?? '—', icon: c.weatherIconUrl?.[0]?.value ?? '',
+    }
+  })()
 
   const diffLabel = (tour.difficulty?.toUpperCase() ?? 'EASY') as 'EASY' | 'MODERATE' | 'ADVANCED'
   const priceAdult  = Number(tour.price_adult)
@@ -106,7 +138,7 @@ export default async function TourDetailPage({ params }: Props) {
         {/* Hero */}
         {heroImg ? (
           <div className="relative w-full pt-[60px] sm:pt-0 overflow-hidden" style={{ height: 'min(56vw, 500px)', minHeight: 260 }}>
-            <img src={heroImg} alt={tour.name} className="w-full h-full object-cover" />
+            <Image src={heroImg} alt={tour.name} fill className="object-cover" priority />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
             {offer && (
               <div className="absolute top-20 right-4 sm:top-6 sm:right-6 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg uppercase tracking-widest">
@@ -151,7 +183,9 @@ export default async function TourDetailPage({ params }: Props) {
               <span className="text-dt-border text-xs">/</span>
               <span className="text-dt-text-2 text-xs font-semibold truncate max-w-[160px] sm:max-w-xs">{tour.name}</span>
               <div className="ml-auto flex items-center gap-4 shrink-0">
-                <span className="text-amber-400 text-sm">★★★★★ <span className="text-dt-text-2 text-xs">4.9</span></span>
+                {reviewStats.total > 0 && reviewStats.avg !== null && (
+                  <span className="text-amber-400 text-sm">★★★★★ <span className="text-dt-text-2 text-xs">{reviewStats.avg}</span></span>
+                )}
                 {tour.departure_zone && (
                   <span className="hidden sm:flex items-center gap-1 text-dt-text-3 text-xs">
                     <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -192,6 +226,38 @@ export default async function TourDetailPage({ params }: Props) {
                   </div>
                 ))}
               </div>
+
+
+              {/* Weather widget */}
+              {weather && tour.departure_zone && (
+                <div className="bg-dt-surface border border-dt-border rounded-xl p-4 flex items-center gap-4">
+                  <div className="flex flex-col items-center shrink-0 min-w-[72px]">
+                    <span className="text-4xl font-black text-dt-text leading-none">{weather.tempC}°</span>
+                    <span className="text-[10px] text-dt-text-3 mt-1 font-medium uppercase tracking-wider">Clima actual</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-dt-text text-sm font-semibold truncate">{weather.desc}</p>
+                    <p className="text-dt-text-3 text-xs mt-0.5">{tour.departure_zone}, RD</p>
+                    <div className="flex flex-wrap gap-3 mt-2 text-xs text-dt-text-3">
+                      <span>Sensación <span className="text-dt-text-2 font-medium">{weather.feels}°C</span></span>
+                      <span>Humedad <span className="text-dt-text-2 font-medium">{weather.humidity}%</span></span>
+                      <span>Viento <span className="text-dt-text-2 font-medium">{weather.windKmph} km/h</span></span>
+                    </div>
+                  </div>
+                  <div className="shrink-0 text-3xl select-none" title={weather.desc}>
+                    {(() => {
+                      const d = weather.desc.toLowerCase()
+                      if (d.includes('sun') || d.includes('clear')) return '☀️'
+                      if (d.includes('partly')) return '⛅'
+                      if (d.includes('cloud') || d.includes('overcast')) return '☁️'
+                      if (d.includes('rain') || d.includes('drizzle')) return '🌧️'
+                      if (d.includes('thunder') || d.includes('storm')) return '⛈️'
+                      if (d.includes('fog') || d.includes('mist')) return '🌫️'
+                      return '🌤️'
+                    })()}
+                  </div>
+                </div>
+              )}
 
               {/* Description */}
               <div className="bg-dt-surface border border-dt-border rounded-xl p-6">
@@ -264,60 +330,68 @@ export default async function TourDetailPage({ params }: Props) {
                     </div>
                   </div>
                 </div>
-              )}
-
-              {/* Ratings */}
+              )}              {/* Ratings */}
               <div className="bg-dt-surface border border-dt-border rounded-xl p-6">
                 <h2 className="font-display font-bold text-dt-text text-xl mb-5">{t('ratings')}</h2>
-                <div className="flex items-start gap-6 mb-5">
-                  <div className="text-center shrink-0">
-                    <div className="text-5xl font-black text-dt-text leading-none">4.9</div>
-                    <div className="flex gap-0.5 justify-center mt-2">
-                      {[1,2,3,4,5].map(s => (
-                        <svg key={s} className="w-4 h-4 fill-gold" viewBox="0 0 24 24">
-                          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                        </svg>
-                      ))}
-                    </div>
-                    <div className="text-xs text-dt-text-3 mt-1.5">{t('excellent')}</div>
-                  </div>
-                  <div className="flex-1 flex flex-col gap-2">
-                    {[['5 ★', 87],['4 ★', 10],['3 ★', 3],['1-2 ★', 0]].map(([label, pct]) => (
-                      <div key={String(label)} className="flex items-center gap-2 text-xs">
-                        <span className="text-dt-text-3 w-8 shrink-0">{label}</span>
-                        <div className="flex-1 h-1.5 bg-dt-border rounded-full overflow-hidden">
-                          <div className="h-full bg-gold rounded-full" style={{ width: `${pct}%` }} />
+                {reviewStats.total > 0 && reviewStats.avg !== null ? (
+                  <>
+                    <div className="flex items-start gap-6 mb-5">
+                      <div className="text-center shrink-0">
+                        <div className="text-5xl font-black text-dt-text leading-none">{reviewStats.avg}</div>
+                        <div className="flex gap-0.5 justify-center mt-2">
+                          {[1,2,3,4,5].map(s => (
+                            <svg key={s} className="w-4 h-4 fill-gold" viewBox="0 0 24 24">
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                            </svg>
+                          ))}
                         </div>
-                        <span className="text-dt-text-3 w-6 text-right">{pct}%</span>
+                        <div className="text-xs text-dt-text-3 mt-1.5">{t('excellent')} &middot; {reviewStats.total}</div>
                       </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                  {[
-                    { name: 'Carlos M.', country: '\u{1F1E9}\u{1F1F4}', text: 'Una experiencia increíble, los guías son excelentes y muy profesionales.' },
-                    { name: 'Sophie L.',  country: '\u{1F1EB}\u{1F1F7}', text: "Parfait ! Nos guías parlaient français et l'organisation était impeccable." },
-                  ].map(rev => (
-                    <div key={rev.name} className="bg-dt-bg border border-dt-border rounded-xl p-3">
-                      <div className="flex items-center gap-2 mb-2">
-                        <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center text-xs font-bold text-accent">
-                          {rev.name[0]}
-                        </div>
-                        <div>
-                          <div className="text-xs font-bold text-dt-text">{rev.name} {rev.country}</div>
-                          <div className="flex gap-0.5">
-                            {[1,2,3,4,5].map(s => (
-                              <svg key={s} className="w-2.5 h-2.5 fill-gold" viewBox="0 0 24 24">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                              </svg>
-                            ))}
+                      <div className="flex-1 flex flex-col gap-2">
+                        {([[
+                          '5 ★', reviewStats.total > 0 ? Math.round(reviewStats.distribution.r5/reviewStats.total*100) : 0],
+                          ['4 ★', reviewStats.total > 0 ? Math.round(reviewStats.distribution.r4/reviewStats.total*100) : 0],
+                          ['3 ★', reviewStats.total > 0 ? Math.round(reviewStats.distribution.r3/reviewStats.total*100) : 0],
+                          ['1-2 ★', reviewStats.total > 0 ? Math.round(reviewStats.distribution.r12/reviewStats.total*100) : 0],
+                        ] as [string, number][]).map(([label, pct]) => (
+                          <div key={label} className="flex items-center gap-2 text-xs">
+                            <span className="text-dt-text-3 w-8 shrink-0">{label}</span>
+                            <div className="flex-1 h-1.5 bg-dt-border rounded-full overflow-hidden">
+                              <div className="h-full bg-gold rounded-full" style={{ width: `${pct}%` }} />
+                            </div>
+                            <span className="text-dt-text-3 w-6 text-right">{pct}%</span>
                           </div>
-                        </div>
+                        ))}
                       </div>
-                      <p className="text-xs text-dt-text-2 leading-relaxed">{rev.text}</p>
                     </div>
-                  ))}
-                </div>
+                    {reviewStats.reviews.length > 0 && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                        {reviewStats.reviews.slice(0, 4).map((rev, i) => (
+                          <div key={i} className="bg-dt-bg border border-dt-border rounded-xl p-3">
+                            <div className="flex items-center gap-2 mb-2">
+                              <div className="w-7 h-7 rounded-full bg-accent/10 flex items-center justify-center text-xs font-bold text-accent">
+                                {rev.firstName[0]}
+                              </div>
+                              <div>
+                                <div className="text-xs font-bold text-dt-text">{rev.firstName}{rev.country ? ` · ${rev.country}` : ''}</div>
+                                <div className="flex gap-0.5">
+                                  {[1,2,3,4,5].map(s => (
+                                    <svg key={s} className={`w-2.5 h-2.5 ${s <= rev.rating ? 'fill-gold' : 'fill-dt-border'}`} viewBox="0 0 24 24">
+                                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                    </svg>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                            {rev.comment && <p className="text-xs text-dt-text-2 leading-relaxed">{rev.comment}</p>}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-sm text-dt-text-3 mb-4">Sé el primero en compartir tu experiencia con este tour.</p>
+                )}
                 <a
                   href={`https://wa.me/18095550100?text=Hola!%20Quiero%20compartir%20mi%20experiencia%20en%20${encodeURIComponent(tour.name)}`}
                   target="_blank" rel="noopener noreferrer"
@@ -330,44 +404,71 @@ export default async function TourDetailPage({ params }: Props) {
 
             {/* Right — sticky booking panel */}
             <div className="lg:sticky lg:top-[104px] flex flex-col gap-3">
-              {/* Offer strip */}
-              {offer && (
-                <div className="bg-gradient-to-r from-red-500/15 to-transparent border border-red-500/25 rounded-xl px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-red-500/15 flex items-center justify-center shrink-0">
-                      <svg className="w-3.5 h-3.5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-red-400 text-xs font-bold">{offer.label} · {t('offerDiscount', { pct: offer.discountPercent })}</p>
-                      <p className="text-red-300/60 text-[11px]">{t('offerValidUntil', { date: fmtDate(offer.endsAt, locale) })}</p>
-                    </div>
+              {tour.coming_soon ? (
+                <div className="bg-dt-surface border border-dt-border rounded-xl p-6 text-center flex flex-col items-center gap-4">
+                  <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center">
+                    <svg className="w-7 h-7 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
                   </div>
-                  {offerAdult !== null && (
-                    <div className="mt-2 pt-2 border-t border-red-500/15 flex items-center gap-2">
-                      <span className="text-dt-text-3 text-sm line-through">${priceAdult}</span>
-                      <span className="text-white font-bold text-lg">${offerAdult}</span>
-                      <span className="text-dt-text-3 text-xs">{t('pricePerAdult')}</span>
+                  <div>
+                    <p className="font-display font-bold text-dt-text text-xl mb-1">Muy pronto</p>
+                    <p className="text-dt-text-2 text-sm leading-relaxed">Este tour estará disponible próximamente. Contáctanos para más información.</p>
+                  </div>
+                  <a
+                    href={`https://wa.me/18095550100?text=Hola!%20Me%20interesa%20el%20tour%20${encodeURIComponent(tour.name)}%20cuando%20est%C3%A9%20disponible.`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="w-full flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm py-3 rounded-xl transition-colors"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
+                      <path d="M12 0C5.373 0 0 5.373 0 12c0 2.125.555 4.122 1.528 5.854L0 24l6.335-1.652A11.947 11.947 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 22c-1.894 0-3.66-.52-5.17-1.424l-.37-.22-3.797.995.995-3.7-.24-.382A9.959 9.959 0 012 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10z"/>
+                    </svg>
+                    Notificarme por WhatsApp
+                  </a>
+                </div>
+              ) : (
+                <>
+                  {/* Offer strip */}
+                  {offer && (
+                    <div className="bg-gradient-to-r from-red-500/15 to-transparent border border-red-500/25 rounded-xl px-4 py-3">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-full bg-red-500/15 flex items-center justify-center shrink-0">
+                          <svg className="w-3.5 h-3.5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-red-400 text-xs font-bold">{offer.label} · {t('offerDiscount', { pct: offer.discountPercent })}</p>
+                          <p className="text-red-300/60 text-[11px]">{t('offerValidUntil', { date: fmtDate(offer.endsAt, locale) })}</p>
+                        </div>
+                      </div>
+                      {offerAdult !== null && (
+                        <div className="mt-2 pt-2 border-t border-red-500/15 flex items-center gap-2">
+                          <span className="text-dt-text-3 text-sm line-through">${priceAdult}</span>
+                          <span className="text-white font-bold text-lg">${offerAdult}</span>
+                          <span className="text-dt-text-3 text-xs">{t('pricePerAdult')}</span>
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
-              )}
 
-              <BookingWidget
-                slug={tour.slug}
-                priceAdult={offerAdult ?? priceAdult}
-                priceChild={offerChild ?? priceChild}
-              />
-              <AddToCartBtn
-                item={{
-                  id: tour.id, slug: tour.slug, name: tour.name,
-                  priceAdult: offerAdult ?? priceAdult,
-                  imageUrl: tour.images[0]?.url ?? null,
-                  categoryIcon: tour.category?.icon ?? '',
-                }}
-              />
-              <p className="text-center text-xs text-dt-text-3">{t('saveSelection')}</p>
+                  <BookingWidget
+                    slug={tour.slug}
+                    priceAdult={offerAdult ?? priceAdult}
+                    priceChild={offerChild ?? priceChild}
+                  />
+                  <AddToCartBtn
+                    item={{
+                      id: tour.id, slug: tour.slug, name: tour.name,
+                      priceAdult: offerAdult ?? priceAdult,
+                      imageUrl: tour.images[0]?.url ?? null,
+                      categoryIcon: tour.category?.icon ?? '',
+                    }}
+                  />
+                  <p className="text-center text-xs text-dt-text-3">{t('saveSelection')}</p>
+                </>
+              )}
             </div>
           </div>
         </div>

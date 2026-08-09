@@ -1,4 +1,4 @@
-export const dynamic = 'force-dynamic'
+export const revalidate = 300
 import Link from 'next/link'
 import Image from 'next/image'
 import { fetchApi } from '@/lib/api'
@@ -17,7 +17,7 @@ interface ZoneData { name: string; count: number; image: string | null }
 
 async function getData() {
   try {
-    const res = await fetchApi<{ data: { products: ApiProduct[]; categories: ApiCategory[] } }>('/catalog')
+    const res = await fetchApi<{ data: { products: ApiProduct[]; categories: ApiCategory[] } }>('/catalog', { next: { revalidate: 300 } })
     const { products, categories } = res.data
 
     const zoneMap = new Map<string, ZoneData>()
