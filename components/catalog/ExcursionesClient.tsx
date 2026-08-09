@@ -10,7 +10,7 @@ export interface ApiCategory {
 export interface ApiProduct {
   id: number; name: string; slug: string; subtitle: string | null
   price_adult: string; price_child: string; duration: string | null
-  difficulty: string; featured: boolean; departure_zone: string | null
+  difficulty: string; featured: boolean; coming_soon?: boolean; departure_zone: string | null
   departure_time: string | null; lat: number | null; lng: number | null
   cover_image: string | null; category: ApiCategory
 }
