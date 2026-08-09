@@ -2,6 +2,7 @@ export const dynamic = 'force-dynamic'
 import { notFound } from 'next/navigation'
 import { fetchApi } from '@/lib/api'
 import Link from 'next/link'
+import { PrintButton } from '@/components/booking/PrintButton'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Reserva Confirmada — Dominicana Tour' }
@@ -111,9 +112,10 @@ export default async function ConfirmationPage({ params }: Props) {
           >
             💬 Hablar con nosotros por WhatsApp
           </a>
+          <PrintButton />
           <Link
             href="/excursiones"
-            className="w-full bg-dt-bg-2 border border-dt-border text-dt-text font-semibold py-3 rounded-dt-sm hover:border-accent transition-colors block text-center"
+            className="w-full bg-dt-bg-2 border border-dt-border text-dt-text font-semibold py-3 rounded-dt-sm hover:border-accent transition-colors block text-center print:hidden"
           >
             Ver más excursiones
           </Link>

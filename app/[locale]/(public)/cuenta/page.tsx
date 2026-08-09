@@ -131,7 +131,11 @@ export default async function CuentaPage() {
 
   const upcoming = reservations.filter(r => ['PENDING', 'CONFIRMED'].includes(r.status))
   const past = reservations.filter(r => ['COMPLETED', 'CANCELLED'].includes(r.status))
-    .sort((a, b) => new Date(b.tourDate.date).getTime() - new Date(a.tourDate.date).getTime())
+    .sort((a, b) => {
+      const da = a.tourDate?.date ? new Date(a.tourDate.date).getTime() : 0
+      const db = b.tourDate?.date ? new Date(b.tourDate.date).getTime() : 0
+      return db - da
+    })
 
   const firstName = session.user.name?.split(' ')[0] ?? 'Cliente'
   const userCountry = ''
@@ -230,7 +234,7 @@ export default async function CuentaPage() {
               {upcoming.map(rv => {
                 const s = STATUS[rv.status] ?? { label: rv.status, bg: '#88888822', text: '#888' }
                 const imgUrl = rv.tour.images[0]?.url
-                const days = daysUntil(new Date(rv.tourDate.date))
+                const days = rv.tourDate?.date ? daysUntil(new Date(rv.tourDate.date)) : -1
                 return (
                   <div key={rv.id}
                     className="bg-dt-surface border border-accent/40 rounded-xl overflow-hidden flex items-stretch transition-colors hover:border-accent"
@@ -251,7 +255,7 @@ export default async function CuentaPage() {
                           <CountdownBadge days={days} />
                         </div>
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-dt-text-3">
-                          <span>{fmtDate(new Date(rv.tourDate.date))}</span>
+                          <span>{rv.tourDate?.date ? fmtDate(new Date(rv.tourDate.date)) : 'Fecha por confirmar'}</span>
                           <span className="text-dt-border">·</span>
                           <span>{rv.adults} adulto{rv.adults !== 1 ? 's' : ''}{rv.children > 0 ? ` · ${rv.children} menor${rv.children !== 1 ? 'es' : ''}` : ''}</span>
                           {rv.tour.departureZone && <><span className="text-dt-border">·</span><span>{rv.tour.departureZone}</span></>}
@@ -334,7 +338,7 @@ export default async function CuentaPage() {
                       <div className="flex-1 min-w-0">
                         <p className="text-dt-text font-bold text-sm truncate">{rv.tour.name}</p>
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-dt-text-3">
-                          <span>{fmtDate(new Date(rv.tourDate.date))}</span>
+                          <span>{rv.tourDate?.date ? fmtDate(new Date(rv.tourDate.date)) : 'Fecha por confirmar'}</span>
                           <span className="text-dt-border">·</span>
                           <span>{rv.adults} adulto{rv.adults !== 1 ? 's' : ''}{rv.children > 0 ? ` · ${rv.children} menor${rv.children !== 1 ? 'es' : ''}` : ''}</span>
                           {rv.tour.departureZone && <><span className="text-dt-border">·</span><span>{rv.tour.departureZone}</span></>}
