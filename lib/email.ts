@@ -1,9 +1,18 @@
-import { Resend } from 'resend'
+import nodemailer from 'nodemailer'
 
-let _resend: Resend | null = null
-function getResend() { return (_resend ??= new Resend(process.env.RESEND_API_KEY)) }
+function getTransport() {
+  return nodemailer.createTransport({
+    host:   process.env.SMTP_HOST ?? '172.18.0.1',
+    port:   Number(process.env.SMTP_PORT ?? 25),
+    secure: false,
+    ...(process.env.SMTP_USER
+      ? { auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS ?? process.env.SMTP_USER } }
+      : {}),
+    tls: { rejectUnauthorized: false },
+  })
+}
 
-const FROM   = 'Dominicana Tour <reservas@leymaken.com>'
+const FROM = process.env.SMTP_FROM ?? 'Dominicana Tour <noreply@mail.dynastydom.com>'
 
 export interface BookingEmailData {
   code:          string
@@ -111,8 +120,7 @@ function html(d: BookingEmailData): string {
 }
 
 export async function sendBookingConfirmation(data: BookingEmailData): Promise<void> {
-  if (!process.env.RESEND_API_KEY) return
-  await getResend().emails.send({
+  await getTransport().sendMail({
     from:    FROM,
     to:      data.email,
     subject: `Reserva recibida: ${data.tourName} · ${data.code}`,

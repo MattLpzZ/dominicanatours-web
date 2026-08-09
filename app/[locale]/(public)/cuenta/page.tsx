@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 import { auth, signIn, signOut } from '@/auth'
 import { prisma } from '@/lib/prisma'
+import { ReviewModal } from '@/components/tour/ReviewModal'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -20,6 +21,31 @@ const STATUS: Record<string, { label: string; bg: string; text: string }> = {
 
 function fmtDate(d: Date) {
   return d.toLocaleDateString('es-DO', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+function daysUntil(date: Date): number {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const target = new Date(date)
+  target.setHours(0, 0, 0, 0)
+  return Math.round((target.getTime() - today.getTime()) / 86400000)
+}
+
+function CountdownBadge({ days }: { days: number }) {
+  if (days < 0) return null
+  const label = days === 0 ? '¡Hoy!' : days === 1 ? 'Mañana' : `en ${days} días`
+  const isClose = days <= 3
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full tracking-wide"
+      style={{ background: isClose ? '#22C55E22' : '#38BDF822', color: isClose ? '#22C55E' : '#38BDF8' }}
+    >
+      <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      {label}
+    </span>
+  )
 }
 
 export default async function CuentaPage() {
@@ -71,13 +97,13 @@ export default async function CuentaPage() {
         hotel: true, createdAt: true,
         tour: {
           select: {
-            name: true, slug: true, departureZone: true,
+            id: true, name: true, slug: true, departureZone: true,
             images: { take: 1, orderBy: { order: 'asc' }, select: { url: true } },
           },
         },
         tourDate: { select: { date: true } },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { tourDate: { date: 'asc' } },
       take: 20,
     }),
   ])
@@ -102,7 +128,13 @@ export default async function CuentaPage() {
   const totalSpent = reservations
     .filter(r => r.status !== 'CANCELLED')
     .reduce((s, r) => s + Number(r.totalAmount), 0)
-  const activeTrips = reservations.filter(r => ['PENDING', 'CONFIRMED'].includes(r.status)).length
+
+  const upcoming = reservations.filter(r => ['PENDING', 'CONFIRMED'].includes(r.status))
+  const past = reservations.filter(r => ['COMPLETED', 'CANCELLED'].includes(r.status))
+    .sort((a, b) => new Date(b.tourDate.date).getTime() - new Date(a.tourDate.date).getTime())
+
+  const firstName = session.user.name?.split(' ')[0] ?? 'Cliente'
+  const userCountry = ''
 
   async function toggleSubscribe() {
     'use server'
@@ -181,41 +213,29 @@ export default async function CuentaPage() {
           </form>
         </div>
 
-        {/* ── MIS VIAJES ── */}
-        <div>
-          <div className="flex items-end justify-between gap-2 mb-4">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3 mb-1">Historial</p>
-              <h2 className="text-[20px] font-extrabold tracking-tight text-dt-text leading-tight">
-                Mis Viajes
-                {reservations.length > 0 && <span className="text-dt-text-3 font-normal text-sm ml-2">({reservations.length})</span>}
-              </h2>
+        {/* ── PRÓXIMOS VIAJES ── */}
+        {upcoming.length > 0 && (
+          <div>
+            <div className="flex items-end justify-between gap-2 mb-4">
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3 mb-1">Próximamente</p>
+                <h2 className="text-[20px] font-extrabold tracking-tight text-dt-text leading-tight">
+                  Mis Próximos Viajes
+                  <span className="text-dt-text-3 font-normal text-sm ml-2">({upcoming.length})</span>
+                </h2>
+              </div>
             </div>
-            {activeTrips > 0 && (
-              <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-accent/15 text-accent">
-                {activeTrips} próximo{activeTrips !== 1 ? 's' : ''}
-              </span>
-            )}
-          </div>
 
-          {reservations.length === 0 ? (
-            <div className="bg-dt-surface border border-dt-border rounded-2xl p-10 text-center">
-              <div className="w-12 h-12 rounded-xl bg-dt-bg-2 flex items-center justify-center mx-auto mb-4 text-2xl">🏝️</div>
-              <p className="text-dt-text font-semibold mb-1.5">Aún no has reservado ningún tour</p>
-              <p className="text-dt-text-3 text-sm mb-6">Explora nuestras excursiones y vive la experiencia dominicana.</p>
-              <Link href="/excursiones"
-                className="inline-flex items-center gap-2 bg-accent text-white font-bold text-sm px-6 py-2.5 rounded-xl hover:bg-accent/90 transition-colors">
-                Explorar excursiones →
-              </Link>
-            </div>
-          ) : (
             <div className="flex flex-col gap-3">
-              {reservations.map(rv => {
+              {upcoming.map(rv => {
                 const s = STATUS[rv.status] ?? { label: rv.status, bg: '#88888822', text: '#888' }
                 const imgUrl = rv.tour.images[0]?.url
+                const days = daysUntil(new Date(rv.tourDate.date))
                 return (
-                  <div key={rv.id} className="bg-dt-surface border border-dt-border rounded-xl overflow-hidden flex items-stretch gap-0 transition-colors hover:border-dt-border-2">
-                    {/* Tour thumbnail */}
+                  <div key={rv.id}
+                    className="bg-dt-surface border border-accent/40 rounded-xl overflow-hidden flex items-stretch transition-colors hover:border-accent"
+                    style={{ boxShadow: '0 0 0 1px rgba(16,185,129,0.08)' }}
+                  >
                     {imgUrl ? (
                       <div className="relative w-[88px] shrink-0 hidden sm:block">
                         <Image src={imgUrl} alt={rv.tour.name} fill className="object-cover" />
@@ -224,10 +244,12 @@ export default async function CuentaPage() {
                       <div className="w-[88px] shrink-0 bg-dt-bg-2 hidden sm:flex items-center justify-center text-3xl">🏝️</div>
                     )}
 
-                    {/* Content */}
                     <div className="flex-1 min-w-0 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
                       <div className="flex-1 min-w-0">
-                        <p className="text-dt-text font-bold text-sm truncate">{rv.tour.name}</p>
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-dt-text font-bold text-sm truncate">{rv.tour.name}</p>
+                          <CountdownBadge days={days} />
+                        </div>
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-dt-text-3">
                           <span>{fmtDate(new Date(rv.tourDate.date))}</span>
                           <span className="text-dt-border">·</span>
@@ -247,7 +269,99 @@ export default async function CuentaPage() {
                       </div>
                     </div>
 
-                    {/* Action */}
+                    <div className="border-l border-dt-border flex items-center px-4 shrink-0">
+                      <Link href={`/reserva/${rv.code}`}
+                        className="text-xs font-semibold text-dt-text-3 hover:text-accent transition-colors whitespace-nowrap">
+                        Ver detalle →
+                      </Link>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ── HISTORIAL ── */}
+        <div>
+          <div className="flex items-end justify-between gap-2 mb-4">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.1em] text-dt-text-3 mb-1">
+                {upcoming.length > 0 ? 'Historial' : 'Mis viajes'}
+              </p>
+              <h2 className="text-[20px] font-extrabold tracking-tight text-dt-text leading-tight">
+                {upcoming.length > 0 ? 'Viajes Pasados' : 'Mis Viajes'}
+                {reservations.length > 0 && (
+                  <span className="text-dt-text-3 font-normal text-sm ml-2">
+                    ({upcoming.length > 0 ? past.length : reservations.length})
+                  </span>
+                )}
+              </h2>
+            </div>
+          </div>
+
+          {reservations.length === 0 ? (
+            <div className="bg-dt-surface border border-dt-border rounded-2xl p-10 text-center">
+              <div className="w-12 h-12 rounded-xl bg-dt-bg-2 flex items-center justify-center mx-auto mb-4 text-2xl">🏝️</div>
+              <p className="text-dt-text font-semibold mb-1.5">Aún no has reservado ningún tour</p>
+              <p className="text-dt-text-3 text-sm mb-6">Explora nuestras excursiones y vive la experiencia dominicana.</p>
+              <Link href="/excursiones"
+                className="inline-flex items-center gap-2 bg-accent text-white font-bold text-sm px-6 py-2.5 rounded-xl hover:bg-accent/90 transition-colors">
+                Explorar excursiones →
+              </Link>
+            </div>
+          ) : past.length === 0 && upcoming.length > 0 ? (
+            <div className="bg-dt-surface border border-dt-border rounded-xl p-6 text-center">
+              <p className="text-dt-text-3 text-sm">Tus viajes completados aparecerán aquí.</p>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {(upcoming.length > 0 ? past : reservations).map(rv => {
+                const s = STATUS[rv.status] ?? { label: rv.status, bg: '#88888822', text: '#888' }
+                const imgUrl = rv.tour.images[0]?.url
+                const isCompleted = rv.status === 'COMPLETED'
+                return (
+                  <div key={rv.id} className="bg-dt-surface border border-dt-border rounded-xl overflow-hidden flex items-stretch transition-colors hover:border-dt-border-2">
+                    {imgUrl ? (
+                      <div className="relative w-[88px] shrink-0 hidden sm:block">
+                        <Image src={imgUrl} alt={rv.tour.name} fill className="object-cover opacity-70" />
+                      </div>
+                    ) : (
+                      <div className="w-[88px] shrink-0 bg-dt-bg-2 hidden sm:flex items-center justify-center text-3xl opacity-60">🏝️</div>
+                    )}
+
+                    <div className="flex-1 min-w-0 p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-dt-text font-bold text-sm truncate">{rv.tour.name}</p>
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 mt-1 text-xs text-dt-text-3">
+                          <span>{fmtDate(new Date(rv.tourDate.date))}</span>
+                          <span className="text-dt-border">·</span>
+                          <span>{rv.adults} adulto{rv.adults !== 1 ? 's' : ''}{rv.children > 0 ? ` · ${rv.children} menor${rv.children !== 1 ? 'es' : ''}` : ''}</span>
+                          {rv.tour.departureZone && <><span className="text-dt-border">·</span><span>{rv.tour.departureZone}</span></>}
+                        </div>
+                        <p className="text-dt-text-3 text-[11px] font-mono mt-1.5 tracking-wide">#{rv.code}</p>
+                      </div>
+
+                      <div className="flex sm:flex-col items-center sm:items-end gap-3 sm:gap-1.5 shrink-0">
+                        <span className="text-[11px] font-bold px-2.5 py-1 rounded-full" style={{ background: s.bg, color: s.text }}>
+                          {s.label}
+                        </span>
+                        {isCompleted ? (
+                          <ReviewModal
+                            tourId={rv.tour.id}
+                            tourName={rv.tour.name}
+                            firstName={firstName}
+                            country={userCountry}
+                            reservationCode={rv.code}
+                          />
+                        ) : (
+                          <p className="text-dt-text font-black text-base tabular-nums">
+                            ${Number(rv.totalAmount).toFixed(0)}<span className="text-dt-text-3 text-xs font-normal"> USD</span>
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
                     <div className="border-l border-dt-border flex items-center px-4 shrink-0">
                       <Link href={`/reserva/${rv.code}`}
                         className="text-xs font-semibold text-dt-text-3 hover:text-accent transition-colors whitespace-nowrap">
@@ -319,7 +433,7 @@ export default async function CuentaPage() {
           )}
         </div>
 
-        {/* ── ACCESO RAPIDO ── */}
+        {/* ── ACCESO RÁPIDO ── */}
         <div className="border-t border-dt-border pt-6 flex flex-wrap gap-3">
           <Link href="/mis-reservas"
             className="flex items-center gap-2 text-sm text-dt-text-2 font-semibold px-4 py-2.5 rounded-xl border border-dt-border hover:border-accent hover:text-accent transition-colors">
