@@ -15,7 +15,7 @@ export default function PrivacidadPage() {
         </div>
 
         <h1 className="font-display font-bold text-dt-text text-4xl mb-2">Política de Privacidad</h1>
-        <p className="text-dt-text-3 text-sm mb-10">Última actualización: junio 2026</p>
+        <p className="text-dt-text-3 text-sm mb-10">Última actualización: agosto 2026</p>
 
         <div className="prose prose-sm max-w-none text-dt-text-2 space-y-8">
 
@@ -50,7 +50,35 @@ export default function PrivacidadPage() {
 
           <section>
             <h2 className="font-display font-bold text-dt-text text-xl mb-3">4. Cookies y Tecnologías de Rastreo</h2>
-            <p>Nuestro sitio utiliza cookies técnicas esenciales para el funcionamiento del sitio (sesión, carrito). No utilizamos cookies de seguimiento de terceros ni publicidad comportamental.</p>
+            <p className="mb-3">Las cookies son pequeños archivos de texto que se almacenan en tu dispositivo cuando visitas nuestro sitio. Utilizamos las siguientes categorías:</p>
+
+            <div className="space-y-4 mt-3">
+              <div className="border border-dt-border rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-semibold text-dt-text">Cookies esenciales</span>
+                  <span className="text-[11px] px-2 py-0.5 rounded bg-dt-border text-dt-text-3 font-medium">Siempre activas</span>
+                </div>
+                <p className="text-sm mb-2">Necesarias para que el sitio funcione correctamente. Sin ellas no podrías iniciar sesión ni completar una reserva.</p>
+                <ul className="list-none space-y-1 text-xs text-dt-text-3 font-mono">
+                  <li><span className="text-dt-text-2">next-auth.session-token</span> — sesión de usuario autenticado</li>
+                  <li><span className="text-dt-text-2">dt-consent</span> — tu preferencia de cookies (1 año)</li>
+                </ul>
+              </div>
+
+              <div className="border border-dt-border rounded-xl p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-semibold text-dt-text">Cookies de analítica</span>
+                  <span className="text-[11px] px-2 py-0.5 rounded bg-accent/15 text-accent font-medium">Opcionales — requieren consentimiento</span>
+                </div>
+                <p className="text-sm mb-2">Nos permiten entender cómo se utiliza el sitio (páginas visitadas, tiempo de permanencia) para mejorar la experiencia. No contienen información personal identificable.</p>
+                <ul className="list-none space-y-1 text-xs text-dt-text-3 font-mono">
+                  <li><span className="text-dt-text-2">_ga, _gid</span> — Google Analytics (pendiente de activación)</li>
+                </ul>
+                <p className="text-xs text-dt-text-3 mt-2">Estas cookies solo se activan si aceptas el uso completo al ver el aviso de cookies.</p>
+              </div>
+            </div>
+
+            <p className="mt-4 text-sm">Puedes cambiar tu preferencia en cualquier momento haciendo clic en <strong>Cookies</strong> al pie de esta página.</p>
           </section>
 
           <section>
