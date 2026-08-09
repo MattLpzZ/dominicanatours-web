@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useSession } from 'next-auth/react'
 import type { ApiProduct } from '@/app/[locale]/(public)/reservar/[slug]/page'
 
 const BASE = process.env.NEXT_PUBLIC_API_URL
@@ -244,17 +245,59 @@ function Step1({
 function Step2({
   firstName, setFirstName, lastName, setLastName,
   phone, setPhone, email, setEmail, hotel, setHotel,
+  isLoggedIn, forOther, onForOtherChange,
 }: {
   firstName: string; setFirstName: (s: string) => void
   lastName: string; setLastName: (s: string) => void
   phone: string; setPhone: (s: string) => void
   email: string; setEmail: (s: string) => void
   hotel: string; setHotel: (s: string) => void
+  isLoggedIn: boolean
+  forOther: boolean
+  onForOtherChange: (v: boolean) => void
 }) {
   return (
     <div>
-      <h2 className="font-display font-bold text-dt-text text-2xl mb-1">Tus datos de contacto</h2>
-      <p className="text-dt-text-3 text-sm mb-6">Te contactaremos por WhatsApp para confirmar los detalles.</p>
+      <h2 className="font-display font-bold text-dt-text text-2xl mb-1">
+        {forOther ? 'Datos del participante' : 'Tus datos de contacto'}
+      </h2>
+      <p className="text-dt-text-3 text-sm mb-4">Te contactaremos por WhatsApp para confirmar los detalles.</p>
+
+      {/* Logged-in banner + "for other" toggle */}
+      {isLoggedIn && (
+        <div className={`flex items-center justify-between gap-3 px-4 py-3 rounded-dt border mb-5 ${
+          forOther
+            ? 'bg-amber-500/5 border-amber-500/20'
+            : 'bg-emerald-500/5 border-emerald-500/20'
+        }`}>
+          <div className="flex items-center gap-2.5 min-w-0">
+            {forOther ? (
+              <svg className="w-4 h-4 shrink-0 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+              </svg>
+            ) : (
+              <svg className="w-4 h-4 shrink-0 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/>
+              </svg>
+            )}
+            <span className={`text-xs font-medium ${forOther ? 'text-amber-300' : 'text-emerald-400'}`}>
+              {forOther
+                ? 'Ingresa los datos de quien irá al tour'
+                : 'Pre-llenado desde tu cuenta'}
+            </span>
+          </div>
+          <label className="flex items-center gap-2 cursor-pointer shrink-0">
+            <span className="text-[11px] text-dt-text-3 whitespace-nowrap">Otra persona</span>
+            <button
+              type="button"
+              onClick={() => onForOtherChange(!forOther)}
+              className={`relative w-9 h-5 rounded-full transition-colors duration-200 focus:outline-none ${forOther ? 'bg-accent' : 'bg-dt-border'}`}
+            >
+              <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white shadow transition-transform duration-200 ${forOther ? 'translate-x-4' : 'translate-x-0'}`} />
+            </button>
+          </label>
+        </div>
+      )}
 
       <div className="flex flex-col gap-4">
         <div className="grid grid-cols-2 gap-4">
@@ -508,6 +551,8 @@ function Step3({
 
 // ── Main checkout component ──
 export function CheckoutClient({ product, initialAdults, initialChildren, initialDate }: Props) {
+  const { data: session } = useSession()
+
   const [step, setStep]       = useState<1 | 2 | 3>(initialDate ? 2 : 1)
   const [animKey, setAnimKey] = useState(0)
   const [animDir, setAnimDir] = useState<'fwd' | 'bck'>('fwd')
@@ -524,6 +569,38 @@ export function CheckoutClient({ product, initialAdults, initialChildren, initia
   const [phone,    setPhone]    = useState('')
   const [email,    setEmail]    = useState('')
   const [hotel,    setHotel]    = useState('')
+
+  // "For another person" toggle — when true, user manually fills contact fields
+  const [forOther, setForOther]     = useState(false)
+  const [sessionFirst, setSessionFirst] = useState('')
+  const [sessionLast,  setSessionLast]  = useState('')
+  const [sessionEmail, setSessionEmail] = useState('')
+
+  // Pre-fill from session once loaded
+  useEffect(() => {
+    if (!session?.user) return
+    const parts = (session.user.name ?? '').trim().split(' ')
+    const first = parts[0] ?? ''
+    const last  = parts.slice(1).join(' ')
+    const mail  = session.user.email ?? ''
+    setSessionFirst(first)
+    setSessionLast(last)
+    setSessionEmail(mail)
+    if (!forOther) {
+      setFirstName(prev => prev || first)
+      setLastName(prev  => prev || last)
+      setEmail(prev     => prev || mail)
+    }
+  }, [session])
+
+  function handleForOther(checked: boolean) {
+    setForOther(checked)
+    if (checked) {
+      setFirstName(''); setLastName(''); setEmail('')
+    } else {
+      setFirstName(sessionFirst); setLastName(sessionLast); setEmail(sessionEmail)
+    }
+  }
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('whatsapp')
   const [terms,    setTerms]    = useState(false)
   const [error,    setError]    = useState('')
@@ -750,6 +827,9 @@ export function CheckoutClient({ product, initialAdults, initialChildren, initia
                 phone={phone} setPhone={setPhone}
                 email={email} setEmail={setEmail}
                 hotel={hotel} setHotel={setHotel}
+                isLoggedIn={!!session?.user}
+                forOther={forOther}
+                onForOtherChange={handleForOther}
               />
             )}
             {step === 3 && (
