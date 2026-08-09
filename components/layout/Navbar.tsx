@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 import { useSession, signIn } from 'next-auth/react'
 import { useCart } from '@/lib/cart-store'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
+import { CartDrawer } from '@/components/cart/CartDrawer'
 
 export interface ZoneNav { name: string; count: number; image: string | null }
 export interface CatNav  { id: number; name: string; slug: string }
@@ -27,6 +28,7 @@ export function Navbar({ zones = [], categories = [] }: Props) {
   const router   = useRouter()
 
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [cartOpen, setCartOpen]     = useState(false)
   const [search, setSearch]         = useState('')
   const [activeDD, setActiveDD]     = useState<DD | null>(null)
   const closeTimer                  = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -84,9 +86,10 @@ export function Navbar({ zones = [], categories = [] }: Props) {
               {t('langSwitch')}
             </button>
             <ThemeToggle />
-            <Link href="/cuenta"
+            <button
+              onClick={() => setCartOpen(true)}
               className="relative w-9 h-9 flex items-center justify-center rounded-lg hover:bg-dt-bg-2 transition-all text-dt-text-3 hover:text-dt-text"
-              aria-label="Tours guardados">
+              aria-label="Mi selección">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
               </svg>
@@ -95,7 +98,7 @@ export function Navbar({ zones = [], categories = [] }: Props) {
                   {items.length}
                 </span>
               )}
-            </Link>
+            </button>
             {session?.user ? (
               <Link href="/cuenta"
                 className="flex items-center justify-center w-8 h-8 rounded-full overflow-hidden border border-dt-border hover:border-accent/40 transition-all shrink-0">
@@ -266,6 +269,8 @@ export function Navbar({ zones = [], categories = [] }: Props) {
         onClick={closeDD}
         aria-hidden="true"
       />
+
+      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
 
       {/* ── Mobile drawer ── */}
       <div className={cn(
