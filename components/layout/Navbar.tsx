@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 import { useSession, signIn } from 'next-auth/react'
 import { useCart } from '@/lib/cart-store'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
-import { CartDrawer } from '@/components/cart/CartDrawer'
+import { CartTray } from '@/components/cart/CartTray'
 
 export interface ZoneNav { name: string; count: number; image: string | null }
 export interface CatNav  { id: number; name: string; slug: string }
@@ -86,19 +86,22 @@ export function Navbar({ zones = [], categories = [] }: Props) {
               {t('langSwitch')}
             </button>
             <ThemeToggle />
-            <button
-              onClick={() => setCartOpen(true)}
-              className="relative w-9 h-9 flex items-center justify-center rounded-lg hover:bg-dt-bg-2 transition-all text-dt-text-3 hover:text-dt-text"
-              aria-label="Mi selección">
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
-              </svg>
-              {items.length > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
-                  {items.length}
-                </span>
-              )}
-            </button>
+            <div className="relative">
+              <button
+                onClick={() => setCartOpen(v => !v)}
+                className="relative w-9 h-9 flex items-center justify-center rounded-lg hover:bg-dt-bg-2 transition-all text-dt-text-3 hover:text-dt-text"
+                aria-label="Mi selección">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+                </svg>
+                {items.length > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-accent text-white text-[10px] font-bold rounded-full flex items-center justify-center leading-none">
+                    {items.length}
+                  </span>
+                )}
+              </button>
+              <CartTray open={cartOpen} onClose={() => setCartOpen(false)} />
+            </div>
             {session?.user ? (
               <Link href="/cuenta"
                 className="flex items-center justify-center w-8 h-8 rounded-full overflow-hidden border border-dt-border hover:border-accent/40 transition-all shrink-0">
@@ -270,7 +273,10 @@ export function Navbar({ zones = [], categories = [] }: Props) {
         aria-hidden="true"
       />
 
-      <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      {/* overlay to close cart tray when clicking outside */}
+      {cartOpen && (
+        <div className="fixed inset-0 z-40" onClick={() => setCartOpen(false)} aria-hidden="true" />
+      )}
 
       {/* ── Mobile drawer ── */}
       <div className={cn(
