@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { getAdminSession } from '@/lib/admin-auth'
 import { redirect } from 'next/navigation'
-import TourForm from '../TourForm'
+import TourWizard from '../TourWizard'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,10 +12,13 @@ export default async function NuevaTourPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="font-display text-2xl font-bold text-dt-text">Nueva excursion</h1>
-        <p className="text-dt-text-3 text-sm mt-1">Registra una nueva excursion o tour</p>
+        <h1 className="font-display text-2xl font-bold text-dt-text">Nueva excursión</h1>
+        <p className="text-dt-text-3 text-sm mt-1">Completa los 3 pasos para registrar la excursión</p>
       </div>
-      <TourForm categories={categories.map(c => ({ id: c.id, name: c.name }))} />
+      <TourWizard
+        mode="create"
+        categories={categories.map(c => ({ id: c.id, name: c.name }))}
+      />
     </div>
   )
 }

@@ -15,6 +15,8 @@ import { getTranslations } from 'next-intl/server'
 import type { Metadata } from 'next'
 import type { ApiProduct } from '@/components/catalog/ExcursionesClient'
 import { CopyLinkButton } from '@/components/tour/CopyLinkButton'
+import { ReviewModal } from '@/components/review/ReviewModal'
+import { ParallaxHero } from '@/components/tour/ParallaxHero'
 
 interface ApiReview {
   firstName: string; country: string | null; rating: number
@@ -72,7 +74,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         description: tour.subtitle ?? undefined,
         type: 'website',
         locale: isEn ? 'en_US' : 'es_DO',
-        images: tour.images[0] ? [{ url: tour.images[0].url, width: 1200, height: 630, alt: tour.name }] : [],
+        images: (tour.cover_image || tour.images?.[0]?.url) ? [{ url: tour.cover_image ?? tour.images[0].url, width: 1200, height: 630, alt: tour.name }] : [],
       },
     }
   } catch { return {} }
@@ -103,9 +105,10 @@ export default async function TourDetailPage({ params }: Props) {
       : Promise.resolve(null),
   ])
 
-  const related: ApiProduct[] = allCatalogRes?.data?.products
-    ?.filter(p => p.category?.slug === tour.category?.slug && p.id !== tour.id)
-    ?.slice(0, 3) ?? []
+  const sameDest: ApiProduct[] = allCatalogRes?.data?.products
+    ?.filter(p => p.departure_zone && p.departure_zone === tour.departure_zone && p.id !== tour.id) ?? []
+  const related: ApiProduct[] = (sameDest.length > 0 ? sameDest : (allCatalogRes?.data?.products
+    ?.filter(p => p.category?.slug === tour.category?.slug && p.id !== tour.id) ?? [])).slice(0, 3)
 
   const reviewStats: ApiReviewStats = reviewStatsRes ?? { reviews: [], total: 0, avg: null, distribution: { r5: 0, r4: 0, r3: 0, r12: 0 } }
 
@@ -129,7 +132,7 @@ export default async function TourDetailPage({ params }: Props) {
   const offerChild  = offer && priceChild > 0 ? Math.round(priceChild * (1 - offer.discountPercent / 100)) : null
   const included    = (tour.includes ?? []).filter(i => i.included)
   const excluded    = (tour.includes ?? []).filter(i => !i.included)
-  const heroImg     = tour.images?.[0]?.url
+  const heroImg     = tour.cover_image ?? tour.images?.[0]?.url
 
   return (
     <>
@@ -137,8 +140,8 @@ export default async function TourDetailPage({ params }: Props) {
 
         {/* Hero */}
         {heroImg ? (
-          <div className="relative w-full pt-[60px] sm:pt-0 overflow-hidden" style={{ height: 'min(56vw, 500px)', minHeight: 260 }}>
-            <Image src={heroImg} alt={tour.name} fill className="object-cover" priority />
+          <div className="relative w-full pt-[60px] sm:pt-0 overflow-hidden" style={{ height: 'min(56vw, 520px)', minHeight: 280 }}>
+            <ParallaxHero src={heroImg} alt={tour.name} />
             <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
             {offer && (
               <div className="absolute top-20 right-4 sm:top-6 sm:right-6 bg-red-500 text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-lg uppercase tracking-widest">
@@ -392,13 +395,12 @@ export default async function TourDetailPage({ params }: Props) {
                 ) : (
                   <p className="text-sm text-dt-text-3 mb-4">Sé el primero en compartir tu experiencia con este tour.</p>
                 )}
-                <a
-                  href={`https://wa.me/18095550100?text=Hola!%20Quiero%20compartir%20mi%20experiencia%20en%20${encodeURIComponent(tour.name)}`}
-                  target="_blank" rel="noopener noreferrer"
-                  className="block w-full text-center border border-dt-border text-dt-text-2 text-sm font-semibold py-2.5 rounded-xl hover:border-accent hover:text-accent transition-colors"
-                >
-                  {t('shareExperience')}
-                </a>
+                <Link
+                href={`/excursiones/${slug}?review=1`}
+                className="block w-full text-center border border-dt-border text-dt-text-2 text-sm font-semibold py-2.5 rounded-xl hover:border-accent hover:text-accent transition-colors"
+              >
+                ⭐ Calificar este tour
+              </Link>
               </div>
             </div>
 
@@ -462,7 +464,7 @@ export default async function TourDetailPage({ params }: Props) {
                     item={{
                       id: tour.id, slug: tour.slug, name: tour.name,
                       priceAdult: offerAdult ?? priceAdult,
-                      imageUrl: tour.images[0]?.url ?? null,
+                      imageUrl: tour.cover_image ?? tour.images?.[0]?.url ?? null,
                       categoryIcon: tour.category?.icon ?? '',
                     }}
                   />
@@ -478,13 +480,14 @@ export default async function TourDetailPage({ params }: Props) {
         {related.length > 0 && (
           <section className="dt-sec py-14">
             <div className="max-w-7xl mx-auto px-4 sm:px-6">
-              <h2 className="font-display font-black text-dt-text text-2xl mb-6">{t('relatedTitle')}</h2>
+              <h2 className="font-display font-black text-dt-text text-2xl mb-6">{sameDest.length > 0 && tour.departure_zone ? `Más tours en ${tour.departure_zone}` : t('relatedTitle')}</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 {related.map(t => <TourCard key={t.id} tour={t} />)}
               </div>
             </div>
           </section>
         )}
+      <ReviewModal tourId={tour.id} tourSlug={slug} tourName={tour.name} />
     </>
   )
 }

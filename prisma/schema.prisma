@@ -36,6 +36,7 @@ model Tour {
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
   offers        TourOffer[]
+  reviews       Review[]
 }
 
 model TourImage {
@@ -103,6 +104,7 @@ model Reservation {
   guideId         Int?
   guide           User?         @relation(fields: [guideId], references: [id])
   participants    Participant[]
+  review          Review?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
 }
@@ -283,4 +285,60 @@ model Campaign {
   updatedAt      DateTime  @updatedAt
 
   @@map("campaigns")
+}
+
+model Review {
+  id            Int          @id @default(autoincrement())
+  tourId        Int?
+  tour          Tour?        @relation(fields: [tourId], references: [id])
+  reservationId Int?         @unique
+  reservation   Reservation? @relation(fields: [reservationId], references: [id])
+  firstName     String       @db.VarChar(255)
+  country       String?      @db.VarChar(100)
+  rating        Int          @default(5)
+  comment       String?      @db.Text
+  language      String?      @default("es") @db.VarChar(10)
+  approved      Boolean?     @default(false)
+  createdAt     DateTime?    @default(now()) @db.DateTime(0)
+}
+
+model Accommodation {
+  id               Int                  @id @default(autoincrement())
+  slug             String               @unique
+  name             String
+  type             String               @default("hotel")
+  shortDescription String?              @db.Text @map("short_description")
+  description      String?              @db.Text
+  address          String?
+  province         String?
+  stars            Int?
+  priceMin         Decimal?             @db.Decimal(10,2) @map("price_min")
+  priceMax         Decimal?             @db.Decimal(10,2) @map("price_max")
+  coverImage       String?              @map("cover_image") @db.VarChar(500)
+  amenities        String?              @db.Text
+  phone            String?              @db.VarChar(50)
+  email            String?              @db.VarChar(255)
+  website          String?              @db.VarChar(500)
+  bookingUrl       String?              @map("booking_url") @db.VarChar(500)
+  featured         Boolean              @default(false)
+  comingSoon       Boolean              @default(false) @map("coming_soon")
+  active           Boolean              @default(true)
+  viewCount        Int                  @default(0) @map("view_count")
+  createdAt        DateTime?            @default(now())
+  updatedAt        DateTime?            @default(now()) @updatedAt
+  images           AccommodationImage[]
+
+  @@map("accommodations")
+}
+
+model AccommodationImage {
+  id              Int           @id @default(autoincrement())
+  accommodationId Int
+  accommodation   Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+  url             String        @db.VarChar(1000)
+  alt             String?       @db.VarChar(300)
+  sortOrder       Int?          @default(0) @map("sort_order")
+  createdAt       DateTime?     @default(now())
+
+  @@map("accommodation_images")
 }

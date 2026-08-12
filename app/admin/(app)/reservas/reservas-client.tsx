@@ -388,10 +388,24 @@ export default function ReservasClient() {
                             </span>
                           </td>
                           <td className="px-4 py-3">
-                            <button onClick={() => openDetail(r)}
-                              className="px-2.5 py-1 rounded-md border border-dt-border text-dt-text-2 hover:bg-dt-bg-2 text-[12px] font-medium transition-colors">
-                              Ver
-                            </button>
+                            <div className="flex items-center gap-1.5">
+                              {r.status !== 'CANCELLED' && r.status !== 'COMPLETED' && (
+                                <button
+                                  onClick={e => { e.stopPropagation(); patch(r.id, { status: 'CANCELLED' }) }}
+                                  disabled={updating === r.id}
+                                  title="Cancelar reserva"
+                                  className="p-1.5 rounded text-dt-text-3 hover:text-red-400 hover:bg-red-500/10 disabled:opacity-40 transition-colors"
+                                >
+                                  <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                  </svg>
+                                </button>
+                              )}
+                              <button onClick={() => openDetail(r)}
+                                className="px-2.5 py-1 rounded-md border border-dt-border text-dt-text-2 hover:bg-dt-bg-2 text-[12px] font-medium transition-colors">
+                                Ver
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
