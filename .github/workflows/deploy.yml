@@ -36,9 +36,18 @@ jobs:
               -e DATABASE_URL="${{ secrets.DT_DATABASE_URL }}" \
               -e AUTH_SECRET="${{ secrets.DT_AUTH_SECRET }}" \
               -e AUTH_TRUST_HOST=true \
+              -e NEXTAUTH_URL="https://dominicanatour.com" \
               -e NEXT_PUBLIC_API_URL="${{ secrets.DT_API_URL }}" \
               -e GOOGLE_CLIENT_ID="${{ secrets.DT_GOOGLE_CLIENT_ID }}" \
               -e GOOGLE_CLIENT_SECRET="${{ secrets.DT_GOOGLE_CLIENT_SECRET }}" \
+              -e SMTP_HOST="172.18.0.1" \
+              -e SMTP_PORT="25" \
+              -e SMTP_FROM="Dominicana Tour <info@dominicanatour.com>" \
+              -e PAYPAL_CLIENT_ID="${{ secrets.DT_PAYPAL_CLIENT_ID }}" \
+              -e PAYPAL_CLIENT_SECRET="${{ secrets.DT_PAYPAL_CLIENT_SECRET }}" \
+              -e PAYPAL_MODE="${{ secrets.DT_PAYPAL_MODE }}" \
+              -e TELEGRAM_BOT_TOKEN="${{ secrets.DT_TELEGRAM_BOT_TOKEN }}" \
+              -e TELEGRAM_CHAT_ID="${{ secrets.DT_TELEGRAM_CHAT_ID }}" \
               -e PORT=3000 \
               -e HOSTNAME=0.0.0.0 \
               dominicana-tour:rebuilt
