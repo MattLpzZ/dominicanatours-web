@@ -6,10 +6,10 @@ export const DEFAULT_BANNERS = [
 ]
 
 export const DEFAULT_STATS = [
-  { n: '820+', label: 'viajeros satisfechos' },
   { n: '50+',  label: 'excursiones únicas' },
-  { n: '4.9',  label: 'calificación promedio' },
+  { n: '100%', label: 'guías certificados' },
   { n: '24/7', label: 'soporte en español' },
+  { n: '5★',   label: 'primera reseña real' },
 ]
 
 export const DEFAULT_ANNOUNCE = [
@@ -18,11 +18,7 @@ export const DEFAULT_ANNOUNCE = [
   'Cancelación gratuita hasta 48h antes',
 ]
 
-export const DEFAULT_TESTIMONIALS = [
-  { name: 'María y Javier', origin: 'España',  tour: 'Tour de Ballenas Jorobadas', text: 'El momento más mágico de nuestro viaje de bodas. Los guías son apasionados y el servicio impecable.' },
-  { name: 'David Chen',     origin: 'EE.UU',   tour: 'Cascadas El Limón',          text: 'Amazing experience! The guides speak English perfectly and the organization was flawless. 100% recommended.' },
-  { name: 'Amélie Dubois',  origin: 'Francia', tour: 'Lago Enriquillo',            text: 'Incroyable! On a vu des crocodiles et des iguanes géants. Une excursion à ne surtout pas manquer.' },
-]
+export const DEFAULT_TESTIMONIALS: { name: string; origin: string; tour: string; text: string }[] = []
 
 export const CONFIG_DEFAULTS: Record<string, string> = {
   business_name:       'Dominicana Tour',
