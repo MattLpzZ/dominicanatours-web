@@ -201,6 +201,21 @@ function Step1({
                     })}
                   </span>
                 </div>
+
+          {/* Custom date request */}
+          <div className="mt-4 pt-4 border-t border-dt-border">
+            <p className="text-xs font-semibold text-dt-text-2 mb-2">¿No encuentras tu fecha? Solicita otra:</p>
+            <input
+              type="date"
+              value={date}
+              min={new Date().toISOString().split('T')[0]}
+              onChange={e => { setDate(e.target.value); setSelectedSlotId(null) }}
+              className="w-full border border-dt-border rounded-lg px-3 py-2.5 text-dt-text bg-dt-bg text-sm focus:outline-none focus:border-accent"
+            />
+            {date && !selectedSlotId && (
+              <p className="text-xs text-dt-text-3 mt-1.5">Confirmaremos disponibilidad para tu fecha en &lt;2h.</p>
+            )}
+          </div>
                 <span className="text-xs text-dt-text-3">
                   {slot.spots_left} lugar{slot.spots_left !== 1 ? 'es' : ''} disponible{slot.spots_left !== 1 ? 's' : ''}
                 </span>

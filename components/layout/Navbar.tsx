@@ -144,7 +144,7 @@ export function Navbar({ zones = [], categories = [] }: Props) {
               onMouseLeave={scheduleClose}
               className={cn(
                 'flex items-center gap-1 px-4 text-[13px] font-medium border-b-2 transition-colors',
-                activeDD === 'lugares' || pathname.startsWith('/excursiones')
+                activeDD === 'lugares'
                   ? 'border-accent text-dt-text'
                   : 'border-transparent text-dt-text-3 hover:text-dt-text hover:border-dt-border',
               )}
@@ -200,25 +200,23 @@ export function Navbar({ zones = [], categories = [] }: Props) {
             </Link>
           </div>
           {zones.length > 0 ? (
-            <div className="flex gap-4 pb-1">
-              {zones.map(zone => (
-                <Link
-                  key={zone.name}
-                  href={`/excursiones?zone=${encodeURIComponent(zone.name)}`}
-                  onClick={closeDD}
-                  className="group flex-shrink-0 w-[110px]"
-                >
-                  <div className="w-[110px] h-[73px] rounded-[6px] overflow-hidden bg-dt-bg-2 mb-2">
-                    {zone.image
-                      ? <img src={zone.image} alt={zone.name} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.07]" loading="lazy" />
-                      : <div className="w-full h-full flex items-center justify-center text-white font-black text-xl" style={{ background: catColor(zone.name) }}>{zone.name[0].toUpperCase()}</div>
-                    }
-                  </div>
-                  <p className="text-[13px] font-semibold text-dt-text group-hover:text-accent transition-colors line-clamp-1 mb-0.5">{zone.name}</p>
-                  <p className="text-[11px] text-dt-text-3">{zone.count} {zone.count === 1 ? 'tour' : 'tours'}</p>
-                </Link>
-              ))}
-            </div>
+              <div>
+                <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-dt-text-3 mb-2 px-1">Destinos</p>
+                <ul className="space-y-0.5">
+                  {zones.map(zone => (
+                    <li key={zone.name}>
+                      <a
+                        href={`/destinos/${zone.name.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')}`}
+                        onClick={closeDD}
+                        className="flex items-center justify-between px-2 py-1.5 rounded-lg hover:bg-dt-bg-2 transition-colors group"
+                      >
+                        <span className="text-[13px] font-semibold text-dt-text group-hover:text-accent transition-colors">{zone.name}</span>
+                        <span className="text-[10px] text-dt-text-3">{zone.count} {zone.count === 1 ? 'tour' : 'tours'}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
           ) : (
             <p className="text-[13px] text-dt-text-3">{t('loadingDestinos')}</p>
           )}

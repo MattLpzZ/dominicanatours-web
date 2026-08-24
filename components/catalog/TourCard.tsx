@@ -1,17 +1,30 @@
+'use client'
 import Link from 'next/link'
 import Image from 'next/image'
+import { useState } from 'react'
 import type { ApiProduct } from '@/components/catalog/ExcursionesClient'
 
 export function TourCard({ tour }: { tour: ApiProduct }) {
   const coverImg = tour.cover_image
+  const [saved, setSaved] = useState(false)
+
+  async function handleSave(e: React.MouseEvent) {
+    e.preventDefault(); e.stopPropagation()
+    setSaved(v => !v)
+    try {
+      const res = await fetch('/api/saved', {
+        method: saved ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ slug: tour.slug, name: tour.name, image: coverImg, price: tour.price_adult, categoryIcon: tour.category?.icon ?? '' }),
+      })
+      if (res.status === 401) { setSaved(false); window.location.href = '/cuenta' }
+    } catch { setSaved(v => !v) }
+  }
 
   return (
-    <Link
-      href={`/excursiones/${tour.slug}`}
-      className="group block rounded-lg overflow-hidden bg-dt-surface border border-dt-border transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-[5px] hover:shadow-[0_8px_32px_rgba(0,0,0,0.10)] hover:border-[var(--color-border-2)]"
-    >
+    <div className="group relative rounded-lg overflow-hidden bg-dt-surface border border-dt-border transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-[5px] hover:shadow-[0_8px_32px_rgba(0,0,0,0.10)] hover:border-[var(--color-border-2)] flex flex-col">
       {/* Image — 3:2 */}
-      <div className="relative overflow-hidden bg-dt-bg-2" style={{ aspectRatio: '3/2' }}>
+      <Link href={`/excursiones/${tour.slug}`} className="block relative overflow-hidden bg-dt-bg-2" style={{ aspectRatio: '3/2' }}>
         {coverImg ? (
           <Image
             src={coverImg}
@@ -29,10 +42,20 @@ export function TourCard({ tour }: { tour: ApiProduct }) {
             Top rated
           </span>
         )}
-      </div>
+        {/* Heart button */}
+        <button
+          onClick={handleSave}
+          className={`absolute top-2.5 right-2.5 w-7 h-7 rounded-full flex items-center justify-center transition-all backdrop-blur-sm ${saved ? 'bg-red-500 text-white' : 'bg-black/40 text-white/70 hover:bg-black/60 hover:text-white'}`}
+          aria-label={saved ? 'Quitar de favoritos' : 'Guardar'}
+        >
+          <svg className="w-3.5 h-3.5" fill={saved ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/>
+          </svg>
+        </button>
+      </Link>
 
       {/* Body */}
-      <div className="p-3.5">
+      <Link href={`/excursiones/${tour.slug}`} className="flex-1 p-3.5 block">
         <p className="text-[10px] font-bold uppercase tracking-[0.07em] text-dt-text-3 mb-1.5">
           {tour.category?.name}{tour.departure_zone ? ` · ${tour.departure_zone}` : ''}
         </p>
@@ -54,7 +77,17 @@ export function TourCard({ tour }: { tour: ApiProduct }) {
             </div>
           </div>
         </div>
+      </Link>
+
+      {/* Reserve CTA */}
+      <div className="px-3.5 pb-3.5">
+        <Link
+          href={`/reservar/${tour.slug}`}
+          className="block w-full text-center bg-accent hover:bg-accent/90 text-white text-xs font-bold py-2 rounded-lg transition-colors"
+        >
+          Reservar
+        </Link>
       </div>
-    </Link>
+    </div>
   )
 }

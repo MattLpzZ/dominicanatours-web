@@ -1,3 +1,9 @@
+
+function slugify(str: string): string {
+  return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
+
 export const revalidate = 300
 import Link from 'next/link'
 import Image from 'next/image'
@@ -17,8 +23,12 @@ interface ZoneData { name: string; count: number; image: string | null }
 
 async function getData() {
   try {
-    const res = await fetchApi<{ data: { products: ApiProduct[]; categories: ApiCategory[] } }>('/catalog', { next: { revalidate: 300 } })
+    const [res, destRes] = await Promise.all([
+      fetchApi<{ data: { products: ApiProduct[]; categories: ApiCategory[] } }>('/catalog', { next: { revalidate: 300 } }),
+      fetchApi<{ destinations: { name: string; cover_image?: string }[] }>('/destinations', { next: { revalidate: 300 } }).catch(() => ({ destinations: [] })),
+    ])
     const { products, categories } = res.data
+    const destCoverMap = new Map((destRes.destinations ?? []).map(d => [d.name, d.cover_image ?? null]))
 
     const zoneMap = new Map<string, ZoneData>()
     products.forEach(p => {
@@ -26,6 +36,11 @@ async function getData() {
       const z = zoneMap.get(p.departure_zone)
       if (!z) zoneMap.set(p.departure_zone, { name: p.departure_zone, count: 1, image: p.cover_image })
       else { z.count++; if (!z.image && p.cover_image) z.image = p.cover_image }
+    })
+    // Override zone images with the destination's own cover_image (set in ERP admin)
+    zoneMap.forEach((z, name) => {
+      const destImg = destCoverMap.get(name)
+      if (destImg) z.image = destImg
     })
     const zones: ZoneData[] = [...zoneMap.values()].sort((a, b) => b.count - a.count)
 
@@ -212,7 +227,7 @@ export default async function LandingPage({ params }: Props) {
                 {zones.map(zone => (
                   <Link
                     key={zone.name}
-                    href={`/excursiones?zone=${encodeURIComponent(zone.name)}`}
+                    href={`/destinos/${slugify(zone.name)}`}
                     className="group flex-shrink-0 cursor-pointer"
                     style={{ scrollSnapAlign: 'start', width: '176px' }}
                   >
@@ -299,13 +314,13 @@ export default async function LandingPage({ params }: Props) {
                       {tour.departure_zone && <span>{tour.departure_zone}</span>}
                       {tour.departure_zone && tour.category && <span className="text-dt-border-2">·</span>}
                       {tour.category && <span>{tour.category.name}</span>}
-                      <span className="text-dt-border-2">·</span>
-                      <span className="flex items-center gap-0.5">
+                      {!!(tour.avg_rating && tour.review_count) && <span className="text-dt-border-2">·</span>}
+                      {!!(tour.avg_rating && tour.review_count) && <span className="flex items-center gap-0.5">
                         <svg className="w-[11px] h-[11px] fill-[#F79009]" viewBox="0 0 20 20">
                           <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
                         </svg>
-                        4.9 <span>(200+)</span>
-                      </span>
+                        {tour.avg_rating && tour.review_count ? <>{tour.avg_rating} <span>({tour.review_count})</span></> : null}
+                      </span>}
                     </div>
                   </div>
                   <div className="text-right shrink-0">

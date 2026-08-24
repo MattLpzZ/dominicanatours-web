@@ -12,7 +12,7 @@ export interface ApiProduct {
   price_adult: string; price_child: string; duration: string | null
   difficulty: string; featured: boolean; coming_soon?: boolean; departure_zone: string | null
   departure_time: string | null; lat: number | null; lng: number | null
-  cover_image: string | null; category: ApiCategory
+  cover_image: string | null; category: ApiCategory; avg_rating?: number | null; review_count?: number
 }
 
 export function getCategoryColor(slug: string, index = 0): string {

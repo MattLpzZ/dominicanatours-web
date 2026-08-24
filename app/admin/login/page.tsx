@@ -9,6 +9,27 @@ export default function AdminLoginPage() {
   const [error, setError]       = useState('')
   const [loading, setLoading]   = useState(false)
 
+  const [forgotMode, setForgotMode]   = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotSent, setForgotSent]   = useState(false)
+  const [forgotErr, setForgotErr]     = useState('')
+  const [forgotLoading, setForgotLoading] = useState(false)
+
+  async function handleForgot(e: React.FormEvent) {
+    e.preventDefault()
+    setForgotErr(''); setForgotLoading(true)
+    try {
+      const res = await fetch('https://dominicantour.leymaken.com/api/v3/auth/forgot-password', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: forgotEmail.trim().toLowerCase() }),
+      })
+      if (!res.ok) { const d = await res.json().catch(() => ({})); setForgotErr(d.error || 'Error'); }
+      else setForgotSent(true)
+    } catch { setForgotErr('Error de conexión') }
+    finally { setForgotLoading(false) }
+  }
+
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setLoading(true); setError('')
@@ -126,6 +147,13 @@ export default function AdminLoginPage() {
             >
               {loading ? 'Verificando...' : 'Iniciar Sesión'}
             </button>
+            {!forgotMode && (
+              <button type="button" onClick={() => { setForgotMode(true); setError('') }}
+                style={{ background: 'none', border: 'none', width: '100%', marginTop: 6,
+                  fontSize: 11, color: '#737373', cursor: 'pointer', textDecoration: 'underline' }}>
+                Olvidé mi contraseña
+              </button>
+            )}
           </form>
         </div>
 
