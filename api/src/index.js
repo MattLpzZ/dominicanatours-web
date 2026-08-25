@@ -1,8 +1,10 @@
 'use strict'
-const express = require('express')
-const cors = require('cors')
-const mysql = require('mysql2/promise')
-const jwt = require('jsonwebtoken')
+const express    = require('express')
+const cors       = require('cors')
+const mysql      = require('mysql2/promise')
+const jwt        = require('jsonwebtoken')
+const cron       = require('node-cron')
+const nodemailer = require('nodemailer')
 
 const app = express()
 app.use(cors())
@@ -581,6 +583,272 @@ app.get('/bookings/:code', async (req, res) => {
     created_at: b.created_at,
   }})
 })
+
+// ── Email Automation ──────────────────────────────────────────────────────────
+
+function getMailer() {
+  return nodemailer.createTransport({
+    host:   process.env.SMTP_HOST ?? '172.18.0.1',
+    port:   Number(process.env.SMTP_PORT ?? 25),
+    secure: false,
+    ...(process.env.SMTP_USER
+      ? { auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS ?? process.env.SMTP_USER } }
+      : {}),
+    tls: { rejectUnauthorized: false },
+  })
+}
+const MAIL_FROM = process.env.SMTP_FROM ?? 'Dominicana Tour <noreply@mail.dynastydom.com>'
+
+async function initEmailLog() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS email_log (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      reservation_id INT NOT NULL,
+      type VARCHAR(20) NOT NULL,
+      sent_at DATETIME DEFAULT NOW(),
+      UNIQUE KEY uq_res_type (reservation_id, type)
+    )
+  `)
+}
+
+function emailHeader() {
+  return `<div style="background:#111;padding:20px 32px">
+    <span style="font-size:18px;font-weight:900;color:#fff;letter-spacing:-.5px">Dominicana</span>
+    <span style="font-size:18px;font-weight:900;color:#E85D20;letter-spacing:-.5px">Tour</span>
+  </div>`
+}
+function emailFooter() {
+  return `<div style="background:#F5F5F5;padding:14px 32px;text-align:center;border-top:1px solid #E8E8E8">
+    <p style="margin:0;font-size:11px;color:#aaa">© 2026 Dominicana Tour · República Dominicana<br>
+    <a href="https://dominicanatour.com/privacidad" style="color:#bbb;text-decoration:none">Privacidad</a>
+    &nbsp;·&nbsp;
+    <a href="https://dominicanatour.com/terminos" style="color:#bbb;text-decoration:none">Términos</a></p>
+  </div>`
+}
+
+function reviewHtml({ firstName, tourName, reviewUrl }) {
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1"></head>
+  <body style="margin:0;padding:0;background:#F2F2F2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <div style="max-width:540px;margin:32px auto 48px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07)">
+    ${emailHeader()}
+    <div style="background:linear-gradient(135deg,#E85D20,#c94d14);padding:28px 32px">
+      <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.1em">Tu opinión importa 🌟</p>
+      <p style="margin:0;font-size:24px;font-weight:900;color:#fff">¿Cómo fue tu experiencia, ${firstName}?</p>
+    </div>
+    <div style="padding:32px">
+      <p style="margin:0 0 20px;color:#555;font-size:15px;line-height:1.65">
+        Esperamos que hayas disfrutado <strong style="color:#111">${tourName}</strong> con nosotros.
+        Tu reseña ayuda a otros viajeros y nos motiva a seguir mejorando cada excursión.
+      </p>
+      <div style="text-align:center;margin:28px 0">
+        <a href="${reviewUrl}" style="display:inline-block;background:#E85D20;color:#fff;font-weight:700;
+           font-size:15px;padding:14px 44px;border-radius:10px;text-decoration:none;letter-spacing:.01em">
+          ⭐ Dejar mi reseña
+        </a>
+      </div>
+      <p style="margin:0;font-size:13px;color:#999;line-height:1.6;text-align:center">
+        Solo toma un minuto y significa mucho para nosotros.<br>
+        Gracias por elegirnos para tu aventura en República Dominicana.
+      </p>
+    </div>
+    ${emailFooter()}
+  </div></body></html>`
+}
+
+function reminderHtml({ firstName, tourName, tourDate, departureTime, adults, children, code, waNumber }) {
+  const fecha = new Date(tourDate + 'T12:00:00').toLocaleDateString('es-DO',
+    { weekday: 'long', day: 'numeric', month: 'long' })
+  const pax = children > 0
+    ? `${adults} adulto${adults !== 1 ? 's' : ''} + ${children} niño${children !== 1 ? 's' : ''}`
+    : `${adults} adulto${adults !== 1 ? 's' : ''}`
+  const hora = departureTime || 'Por coordinar'
+  const waClean = (waNumber || '18095550100').replace(/\D/g, '')
+  const row = (label, value) =>
+    `<tr style="border-top:1px solid #BAE6FD">
+      <td style="padding:8px 0;color:#888;font-size:14px;width:38%">${label}</td>
+      <td style="padding:8px 0;font-size:14px;color:#111">${value}</td>
+    </tr>`
+
+  return `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1"></head>
+  <body style="margin:0;padding:0;background:#F2F2F2;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif">
+  <div style="max-width:540px;margin:32px auto 48px;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07)">
+    ${emailHeader()}
+    <div style="background:linear-gradient(135deg,#0369a1,#0284c7);padding:28px 32px">
+      <p style="margin:0 0 4px;font-size:12px;font-weight:700;color:rgba(255,255,255,.7);text-transform:uppercase;letter-spacing:.1em">Recordatorio — mañana es tu día 🗺️</p>
+      <p style="margin:0;font-size:24px;font-weight:900;color:#fff">¡${firstName}, prepárate para mañana!</p>
+    </div>
+    <div style="padding:32px">
+      <div style="background:#F0F9FF;border:1px solid #BAE6FD;border-radius:12px;padding:20px 24px;margin-bottom:24px">
+        <table style="width:100%;border-collapse:collapse">
+          <tr>
+            <td style="padding:8px 0;color:#888;font-size:14px;width:38%">Tour</td>
+            <td style="padding:8px 0;font-size:14px;font-weight:700;color:#111">${tourName}</td>
+          </tr>
+          ${row('Fecha', `<span style="text-transform:capitalize">${fecha}</span>`)}
+          ${row('Hora de salida', `<strong style="color:#0369a1">${hora}</strong>`)}
+          ${row('Personas', pax)}
+          ${row('Código', `<span style="font-family:monospace;background:#FFF3ED;color:#E85D20;padding:2px 8px;border-radius:4px">${code}</span>`)}
+        </table>
+      </div>
+
+      <div style="background:#FFF7ED;border-left:3px solid #E85D20;border-radius:0 8px 8px 0;padding:14px 18px;margin-bottom:24px">
+        <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#E85D20">Para mañana</p>
+        <ul style="margin:0;padding-left:18px;font-size:13px;color:#666;line-height:1.85">
+          <li>Estaremos pasando por tu hotel según lo coordinado</li>
+          <li>Llega al lobby <strong>10 minutos antes</strong> de la hora de salida</li>
+          <li>Trae ropa cómoda y protector solar</li>
+          <li>El saldo restante se paga el día del tour</li>
+        </ul>
+      </div>
+
+      <div style="text-align:center;margin-bottom:24px;display:flex;gap:8px;justify-content:center">
+        <a href="https://wa.me/${waClean}" style="display:inline-block;background:#25D366;color:#fff;font-weight:700;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none">
+          WhatsApp
+        </a>
+        <a href="https://dominicanatour.com/reserva/${code}" style="display:inline-block;background:#E85D20;color:#fff;font-weight:700;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none">
+          Ver mi reserva
+        </a>
+      </div>
+
+      <p style="margin:0;font-size:13px;color:#999;line-height:1.6;text-align:center">
+        ¿Cambios de último minuto? Escríbenos por WhatsApp antes de las 8pm.
+      </p>
+    </div>
+    ${emailFooter()}
+  </div></body></html>`
+}
+
+// ── Email send functions ───────────────────────────────────────────────────────
+
+async function sendReviewEmails({ dryRun = false } = {}) {
+  const [cfgRows] = await pool.query("SELECT value FROM site_configs WHERE `key`='google_review_url'")
+  const reviewUrl = cfgRows.length ? cfgRows[0].value : null
+
+  const [rows] = await pool.query(`
+    SELECT r.id, r.firstName, r.email, r.code, t.name AS tour_name, t.slug
+    FROM Reservation r
+    JOIN TourDate d ON d.id = r.tourDateId
+    JOIN Tour t ON t.id = r.tourId
+    WHERE r.email IS NOT NULL AND r.email != ''
+    AND r.status IN ('CONFIRMED', 'COMPLETED')
+    AND DATE(d.date) = DATE(DATE_SUB(NOW(), INTERVAL 1 DAY))
+    AND r.id NOT IN (SELECT reservation_id FROM email_log WHERE type = 'review')
+  `)
+
+  if (dryRun) return { count: rows.length, emails: rows.map(r => r.email) }
+
+  const mailer = getMailer()
+  let sent = 0, failed = 0
+  for (const r of rows) {
+    try {
+      await mailer.sendMail({
+        from:    MAIL_FROM,
+        to:      r.email,
+        subject: `¿Cómo fue ${r.tour_name}? — Dominicana Tour`,
+        html:    reviewHtml({
+          firstName: r.firstName,
+          tourName:  r.tour_name,
+          reviewUrl: reviewUrl || `https://dominicanatour.com/excursiones/${r.slug}`,
+        }),
+      })
+      await pool.query('INSERT IGNORE INTO email_log (reservation_id, type) VALUES (?, ?)', [r.id, 'review'])
+      sent++
+    } catch (err) {
+      console.error(`[review-email] failed id=${r.id}: ${err.message}`)
+      failed++
+    }
+  }
+  console.log(`[review-email] sent=${sent} failed=${failed} total=${rows.length}`)
+  return { sent, failed, total: rows.length }
+}
+
+async function sendReminderEmails({ dryRun = false } = {}) {
+  const [cfgRows] = await pool.query(
+    "SELECT `key`, value FROM site_configs WHERE `key` IN ('whatsapp', 'wa_number')"
+  )
+  const cfg = {}
+  cfgRows.forEach(r => { cfg[r.key] = r.value })
+  const waNumber = cfg.whatsapp || cfg.wa_number || '18095550100'
+
+  const [rows] = await pool.query(`
+    SELECT r.id, r.firstName, r.email, r.code, r.adults, r.children,
+           t.name AS tour_name, t.departureTime AS departure_time,
+           DATE_FORMAT(d.date, '%Y-%m-%d') AS tour_date
+    FROM Reservation r
+    JOIN TourDate d ON d.id = r.tourDateId
+    JOIN Tour t ON t.id = r.tourId
+    WHERE r.email IS NOT NULL AND r.email != ''
+    AND r.status IN ('PENDING', 'CONFIRMED')
+    AND DATE(d.date) = DATE(DATE_ADD(NOW(), INTERVAL 1 DAY))
+    AND r.id NOT IN (SELECT reservation_id FROM email_log WHERE type = 'reminder')
+  `)
+
+  if (dryRun) return { count: rows.length, emails: rows.map(r => r.email) }
+
+  const mailer = getMailer()
+  let sent = 0, failed = 0
+  for (const r of rows) {
+    try {
+      await mailer.sendMail({
+        from:    MAIL_FROM,
+        to:      r.email,
+        subject: `Tu excursión es mañana — ${r.tour_name}`,
+        html:    reminderHtml({
+          firstName:     r.firstName,
+          tourName:      r.tour_name,
+          tourDate:      r.tour_date,
+          departureTime: r.departure_time,
+          adults:        r.adults,
+          children:      r.children,
+          code:          r.code,
+          waNumber,
+        }),
+      })
+      await pool.query('INSERT IGNORE INTO email_log (reservation_id, type) VALUES (?, ?)', [r.id, 'reminder'])
+      sent++
+    } catch (err) {
+      console.error(`[reminder-email] failed id=${r.id}: ${err.message}`)
+      failed++
+    }
+  }
+  console.log(`[reminder-email] sent=${sent} failed=${failed} total=${rows.length}`)
+  return { sent, failed, total: rows.length }
+}
+
+// ── Admin: manual trigger + dry-run preview ───────────────────────────────────
+
+app.post('/v3/admin/send-review-requests', requireAdmin, async (req, res) => {
+  const result = await sendReviewEmails()
+  res.json({ ok: true, ...result })
+})
+
+app.post('/v3/admin/send-reminders', requireAdmin, async (req, res) => {
+  const result = await sendReminderEmails()
+  res.json({ ok: true, ...result })
+})
+
+app.get('/v3/admin/email-preview', requireAdmin, async (req, res) => {
+  const [reviews, reminders] = await Promise.all([
+    sendReviewEmails({ dryRun: true }),
+    sendReminderEmails({ dryRun: true }),
+  ])
+  res.json({ reviews, reminders })
+})
+
+// ── Cron: 9am RD (UTC-4) = 13:00 UTC ─────────────────────────────────────────
+initEmailLog()
+  .then(() => {
+    cron.schedule('0 13 * * *', () => {
+      sendReviewEmails().catch(e => console.error('[cron-review]', e.message))
+    })
+    cron.schedule('0 13 * * *', () => {
+      sendReminderEmails().catch(e => console.error('[cron-reminder]', e.message))
+    })
+    console.log('[email-cron] ready — reviews & reminders at 9am RD time (13:00 UTC)')
+  })
+  .catch(e => console.error('[email-cron] init failed:', e.message))
 
 // ── Error handler ─────────────────────────────────────────────────────────────
 app.use((err, req, res, _next) => {
