@@ -10,6 +10,8 @@ interface Tour {
   avg_rating?: number | null; review_count?: number
 }
 
+const PAGE_SIZE = 16
+
 function TourMiniCard({ tour }: { tour: Tour }) {
   return (
     <Link
@@ -58,7 +60,9 @@ function TourMiniCard({ tour }: { tour: Tour }) {
           {!tour.coming_soon && tour.price_adult > 0 && (
             <div className="text-right">
               <div className="text-[9px] text-dt-text-3 leading-none mb-0.5">Desde</div>
-              <div className="text-[14px] font-extrabold text-accent leading-none">${Number(tour.price_adult).toFixed(0)} <span className="text-[10px] font-normal text-dt-text-3">USD</span></div>
+              <div className="text-[14px] font-extrabold text-accent leading-none">
+                ${Number(tour.price_adult).toFixed(0)} <span className="text-[10px] font-normal text-dt-text-3">USD</span>
+              </div>
             </div>
           )}
         </div>
@@ -78,6 +82,7 @@ function TourMiniCard({ tour }: { tour: Tour }) {
 export function DestinoToursClient({ tours, city }: { tours: Tour[]; city: string }) {
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  const [page, setPage] = useState(1)
 
   const categories = useMemo(() => {
     const seen = new Set<string>()
@@ -100,6 +105,14 @@ export function DestinoToursClient({ tours, city }: { tours: Tour[]; city: strin
     })
   }, [tours, search, activeCategory])
 
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE)
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  function changeFilter(fn: () => void) {
+    fn()
+    setPage(1)
+  }
+
   if (tours.length === 0) {
     return (
       <div className="text-center py-16">
@@ -111,7 +124,7 @@ export function DestinoToursClient({ tours, city }: { tours: Tour[]; city: strin
 
   return (
     <div>
-      {/* Search bar */}
+      {/* Search */}
       <div className="flex items-center gap-3 bg-dt-surface border border-dt-border rounded-xl px-4 py-3 focus-within:border-accent/60 focus-within:ring-2 focus-within:ring-accent/10 transition-all mb-5">
         <svg className="w-[18px] h-[18px] text-dt-text-3 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>
@@ -119,12 +132,12 @@ export function DestinoToursClient({ tours, city }: { tours: Tour[]; city: strin
         <input
           type="text"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={e => changeFilter(() => setSearch(e.target.value))}
           placeholder={`Buscar tours en ${city}…`}
           className="flex-1 bg-transparent text-dt-text placeholder:text-dt-text-3 text-[15px] outline-none"
         />
         {search && (
-          <button onClick={() => setSearch('')} className="text-dt-text-3 hover:text-dt-text transition-colors">
+          <button onClick={() => changeFilter(() => setSearch(''))} className="text-dt-text-3 hover:text-dt-text transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
               <path d="M6 18L18 6M6 6l12 12"/>
             </svg>
@@ -136,7 +149,7 @@ export function DestinoToursClient({ tours, city }: { tours: Tour[]; city: strin
       {categories.length > 1 && (
         <div className="flex gap-2 flex-wrap mb-5">
           <button
-            onClick={() => setActiveCategory(null)}
+            onClick={() => changeFilter(() => setActiveCategory(null))}
             className={`px-3.5 py-1.5 rounded-full text-[12px] font-semibold border transition-all ${!activeCategory ? 'bg-accent text-white border-accent' : 'border-dt-border text-dt-text-2 hover:border-accent/40'}`}
           >
             Todos
@@ -144,7 +157,7 @@ export function DestinoToursClient({ tours, city }: { tours: Tour[]; city: strin
           {categories.map(cat => (
             <button
               key={cat}
-              onClick={() => setActiveCategory(activeCategory === cat ? null : cat)}
+              onClick={() => changeFilter(() => setActiveCategory(activeCategory === cat ? null : cat))}
               className={`px-3.5 py-1.5 rounded-full text-[12px] font-semibold border transition-all ${activeCategory === cat ? 'bg-accent text-white border-accent' : 'border-dt-border text-dt-text-2 hover:border-accent/40'}`}
             >
               {cat}
@@ -158,18 +171,66 @@ export function DestinoToursClient({ tours, city }: { tours: Tour[]; city: strin
         {filtered.length === tours.length
           ? `${tours.length} ${tours.length === 1 ? 'tour' : 'tours'} en ${city}`
           : `${filtered.length} de ${tours.length} tours`}
+        {totalPages > 1 && ` · página ${page} de ${totalPages}`}
       </p>
 
-      {/* Grid */}
-      {filtered.length > 0 ? (
+      {/* Grid — 4 cols */}
+      {paginated.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filtered.map(tour => <TourMiniCard key={tour.id} tour={tour} />)}
+          {paginated.map(tour => <TourMiniCard key={tour.id} tour={tour} />)}
         </div>
       ) : (
         <div className="text-center py-16 border border-dt-border rounded-xl bg-dt-surface">
           <p className="text-dt-text-3 mb-2">Sin resultados para &ldquo;{search}&rdquo;</p>
-          <button onClick={() => { setSearch(''); setActiveCategory(null) }} className="text-accent text-sm font-semibold hover:opacity-75 transition-opacity">
+          <button onClick={() => changeFilter(() => { setSearch(''); setActiveCategory(null) })} className="text-accent text-sm font-semibold hover:opacity-75 transition-opacity">
             Limpiar filtros
+          </button>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 mt-10">
+          <button
+            onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+            disabled={page === 1}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-dt-border text-[13px] font-semibold text-dt-text-2 hover:border-accent/40 hover:text-dt-text disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="m15 18-6-6 6-6"/>
+            </svg>
+            Anterior
+          </button>
+
+          <div className="flex items-center gap-1">
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => {
+              if (totalPages <= 7 || p === 1 || p === totalPages || Math.abs(p - page) <= 1) {
+                return (
+                  <button
+                    key={p}
+                    onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                    className={`w-9 h-9 rounded-lg text-[13px] font-bold transition-all ${p === page ? 'bg-accent text-white' : 'border border-dt-border text-dt-text-2 hover:border-accent/40 hover:text-dt-text'}`}
+                  >
+                    {p}
+                  </button>
+                )
+              }
+              if (p === page - 2 || p === page + 2) {
+                return <span key={p} className="text-dt-text-3 text-[13px] px-1">…</span>
+              }
+              return null
+            })}
+          </div>
+
+          <button
+            onClick={() => { setPage(p => Math.min(totalPages, p + 1)); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+            disabled={page === totalPages}
+            className="flex items-center gap-1.5 px-4 py-2 rounded-lg border border-dt-border text-[13px] font-semibold text-dt-text-2 hover:border-accent/40 hover:text-dt-text disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+          >
+            Siguiente
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+              <path d="m9 18 6-6-6-6"/>
+            </svg>
           </button>
         </div>
       )}

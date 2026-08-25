@@ -63,18 +63,7 @@ export function Navbar({ zones = [], categories = [] }: Props) {
             Dominicana<span className="text-accent">Tour</span>
           </Link>
 
-          <form onSubmit={handleSearch} className="hidden md:flex relative flex-1 max-w-sm">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dt-text-3 pointer-events-none shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              type="text"
-              placeholder={t('searchPlaceholder')}
-              className="w-full pl-9 pr-4 py-2 text-sm rounded-full border border-dt-border bg-dt-bg-2 text-dt-text placeholder:text-dt-text-3 focus:outline-none focus:border-accent/40 transition-colors"
-            />
-          </form>
+          
 
           <div className="hidden md:block flex-1" />
 
@@ -283,20 +272,7 @@ export function Navbar({ zones = [], categories = [] }: Props) {
       )}>
         <div className="h-16 border-b border-dt-border shrink-0" />
         <div className="flex flex-col p-6 gap-0 flex-1 overflow-y-auto">
-          <form onSubmit={handleSearch} className="relative mb-6">
-            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-dt-text-3 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
-            </svg>
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              type="text"
-              placeholder={t('searchPlaceholder')}
-              className="w-full pl-9 pr-4 py-3 text-sm rounded-xl border border-dt-border bg-dt-bg-2 text-dt-text placeholder:text-dt-text-3 focus:outline-none"
-            />
-          </form>
-
-          <Link href="/excursiones"
+                    <Link href="/excursiones"
             className={cn('text-2xl font-display font-bold py-4 border-b border-dt-border transition-colors', pathname.startsWith('/excursiones') ? 'text-accent' : 'text-dt-text hover:text-accent')}>
             {t('navLugares')}
           </Link>
