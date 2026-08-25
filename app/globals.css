@@ -50,21 +50,9 @@
   body {
     @apply font-sans text-dt-text antialiased text-[15px] transition-colors duration-200;
     background-color: var(--color-bg);
-    background-image:
-      radial-gradient(ellipse 80vw 72vh, rgba(29,112,183,0.10) 0%, transparent 65%),
-      radial-gradient(ellipse 70vw 65vh, rgba(20,184,166,0.07) 0%, transparent 65%),
-      radial-gradient(ellipse 52vw 52vh, rgba(56,189,248,0.06) 0%, transparent 65%);
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-position: -15% -20%, 115% 118%, 88% 8%;
-    animation: tropical-bg 28s ease-in-out infinite;
   }
   .dark body {
     background-color: #060A10;
-    background-image:
-      radial-gradient(ellipse 80vw 72vh, rgba(29,112,183,0.18) 0%, transparent 65%),
-      radial-gradient(ellipse 70vw 65vh, rgba(20,184,166,0.13) 0%, transparent 65%),
-      radial-gradient(ellipse 52vw 52vh, rgba(56,189,248,0.11) 0%, transparent 65%);
   }
   h1, h2, h3, h4, h5 { font-family: var(--font-display), ui-sans-serif, system-ui, sans-serif; @apply tracking-tight; }
   ::-webkit-scrollbar { width: 6px; height: 6px; }
