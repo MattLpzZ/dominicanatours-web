@@ -39,7 +39,7 @@ const TABS = [
 function Input({ value, onChange, placeholder, className = '' }: { value: string; onChange: (v: string) => void; placeholder?: string; className?: string }) {
   return (
     <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
-      className={`w-full px-3 py-2 text-[13px] rounded-lg border border-[#E5E7EB] dark:border-[#2A2A2A] bg-[#F7F7F7] dark:bg-[#1A1A1A] text-[#111111] dark:text-white placeholder-[#9CA3AF] dark:placeholder-[#525252] outline-none focus:border-[#E85D20] transition-colors ${className}`}
+      className={`w-full px-3 py-2 text-[13px] rounded-lg border border-[#E5E7EB] dark:border-[#2A2A2A] bg-[#F7F7F7] dark:bg-[#1A1A1A] text-[#111111] dark:text-white placeholder-[#9CA3AF] dark:placeholder-[#525252] outline-none focus:border-[#1d70b7] transition-colors ${className}`}
     />
   )
 }
@@ -47,7 +47,7 @@ function Input({ value, onChange, placeholder, className = '' }: { value: string
 function Textarea({ value, onChange, placeholder, rows = 3 }: { value: string; onChange: (v: string) => void; placeholder?: string; rows?: number }) {
   return (
     <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={rows}
-      className="w-full px-3 py-2 text-[13px] rounded-lg border border-[#E5E7EB] dark:border-[#2A2A2A] bg-[#F7F7F7] dark:bg-[#1A1A1A] text-[#111111] dark:text-white placeholder-[#9CA3AF] dark:placeholder-[#525252] outline-none focus:border-[#E85D20] transition-colors resize-none"
+      className="w-full px-3 py-2 text-[13px] rounded-lg border border-[#E5E7EB] dark:border-[#2A2A2A] bg-[#F7F7F7] dark:bg-[#1A1A1A] text-[#111111] dark:text-white placeholder-[#9CA3AF] dark:placeholder-[#525252] outline-none focus:border-[#1d70b7] transition-colors resize-none"
     />
   )
 }
@@ -76,7 +76,7 @@ function SaveRow({ id, saves, onSave }: { id: string; saves: Record<string, { sa
   return (
     <div className="flex items-center gap-3 pt-2">
       <button onClick={onSave} disabled={s.saving}
-        className="flex items-center gap-2 px-5 py-2 bg-[#E85D20] text-white text-[13px] font-bold rounded-lg disabled:opacity-50 transition-opacity">
+        className="flex items-center gap-2 px-5 py-2 bg-[#1d70b7] text-white text-[13px] font-bold rounded-lg disabled:opacity-50 transition-opacity">
         {s.saving
           ? <><span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />Guardando...</>
           : <>Guardar cambios</>}
@@ -110,7 +110,7 @@ function ImageInput({ value, onChange }: { value: string; onChange: (v: string) 
       <div className="flex gap-2">
         <Input value={value} onChange={onChange} placeholder="https://... o /uploads/imagen.jpg" />
         <button onClick={() => ref.current?.click()} disabled={uploading}
-          className="shrink-0 px-3 py-2 rounded-lg border border-[#E5E7EB] dark:border-[#2A2A2A] text-[12px] font-semibold text-[#6B7280] dark:text-[#737373] hover:border-[#E85D20] hover:text-[#E85D20] transition-colors disabled:opacity-50">
+          className="shrink-0 px-3 py-2 rounded-lg border border-[#E5E7EB] dark:border-[#2A2A2A] text-[12px] font-semibold text-[#6B7280] dark:text-[#737373] hover:border-[#1d70b7] hover:text-[#1d70b7] transition-colors disabled:opacity-50">
           {uploading ? 'Subiendo...' : 'Subir'}
         </button>
         <input ref={ref} type="file" accept="image/*" className="hidden" onChange={handleFile} />
@@ -149,8 +149,8 @@ export default function PersonalizacionPage() {
 
   // Theme
   const { theme, setTheme } = useTheme()
-  const [accent, setAccent]   = useState('#E85D20')
-  const [customHex, setCustomHex] = useState('#E85D20')
+  const [accent, setAccent]   = useState('#1d70b7')
+  const [customHex, setCustomHex] = useState('#1d70b7')
 
   // General
   const [businessName, setBusinessName]   = useState('')
@@ -377,17 +377,17 @@ export default function PersonalizacionPage() {
             <div className="grid grid-cols-2 gap-3">
               {(['light', 'dark'] as const).map(t => (
                 <button key={t} onClick={() => setTheme(t)}
-                  className={['flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all', theme === t ? 'border-[#E85D20] bg-orange-50 dark:bg-[rgba(232,93,32,0.07)]' : 'border-[#E5E7EB] dark:border-[#262626] hover:border-[#D1D5DB]'].join(' ')}>
+                  className={['flex items-center gap-3 p-4 rounded-xl border-2 text-left transition-all', theme === t ? 'border-[#1d70b7] bg-orange-50 dark:bg-[rgba(232,93,32,0.07)]' : 'border-[#E5E7EB] dark:border-[#262626] hover:border-[#D1D5DB]'].join(' ')}>
                   <div className={['w-8 h-8 rounded-lg flex items-center justify-center shrink-0', t === 'light' ? 'bg-[#F7F7F7]' : 'bg-[#1A1A1A]'].join(' ')}>
                     {t === 'light'
-                      ? <svg className="w-4 h-4 text-[#E85D20]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
-                      : <svg className="w-4 h-4 text-[#E85D20]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}><path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>}
+                      ? <svg className="w-4 h-4 text-[#1d70b7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z"/></svg>
+                      : <svg className="w-4 h-4 text-[#1d70b7]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75}><path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>}
                   </div>
                   <div>
                     <p className="text-[13px] font-semibold text-[#111111] dark:text-white">{t === 'light' ? 'Modo claro' : 'Modo oscuro'}</p>
                     <p className="text-[11px] text-[#6B7280] dark:text-[#737373] mt-0.5">{t === 'light' ? 'Fondo blanco' : 'Fondo oscuro'}</p>
                   </div>
-                  {theme === t && <svg className="w-4 h-4 text-[#E85D20] ml-auto shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>}
+                  {theme === t && <svg className="w-4 h-4 text-[#1d70b7] ml-auto shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>}
                 </button>
               ))}
             </div>
@@ -398,7 +398,7 @@ export default function PersonalizacionPage() {
           <Card title="Color de acento">
             <p className="text-[12px] text-[#6B7280] dark:text-[#737373]">Afecta botones, precios y badges en el sitio público.</p>
             <div className="flex flex-wrap gap-2">
-              {[{ name:'Naranja', hex:'#E85D20' },{ name:'Coral', hex:'#FF385C' },{ name:'Azul', hex:'#2563EB' },{ name:'Verde', hex:'#16A34A' },{ name:'Violeta', hex:'#7C3AED' },{ name:'Dorado', hex:'#D97706' }].map(p => (
+              {[{ name:'Azul', hex:'#1d70b7' },{ name:'Coral', hex:'#FF385C' },{ name:'Azul Oscuro', hex:'#2563EB' },{ name:'Verde', hex:'#16A34A' },{ name:'Violeta', hex:'#7C3AED' },{ name:'Dorado', hex:'#D97706' }].map(p => (
                 <button key={p.hex} onClick={() => { setAccent(p.hex); setCustomHex(p.hex); document.documentElement.style.setProperty('--color-accent', p.hex) }}
                   className={['flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold border-2 transition-all', accent === p.hex ? 'border-transparent text-white scale-105' : 'border-[#E5E7EB] dark:border-[#2A2A2A] text-[#6B7280] dark:text-[#737373]'].join(' ')}
                   style={accent === p.hex ? { background: p.hex } : {}}>

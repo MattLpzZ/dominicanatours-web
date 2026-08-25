@@ -22,7 +22,7 @@ export function getCategoryColor(slug: string, index = 0): string {
   if (s.includes('cultur') || s.includes('histor'))   return '#F59E0B'
   if (s.includes('fauna') || s.includes('natural'))   return '#10B981'
   if (s.includes('noctur'))                            return '#8B5CF6'
-  const palette = ['#0099CC', '#22C55E', '#F59E0B', '#8B5CF6', '#E85D20', '#EC4899']
+  const palette = ['#0099CC', '#22C55E', '#F59E0B', '#8B5CF6', '#1d70b7', '#EC4899']
   return palette[index % palette.length]
 }
 

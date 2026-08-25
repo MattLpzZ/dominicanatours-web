@@ -214,7 +214,7 @@ export function ChatWidget() {
           'fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-[0_4px_20px_rgba(0,0,0,.25)] flex items-center justify-center transition-all duration-300',
           open
             ? 'bg-[#0A1628] scale-95'
-            : 'bg-[#E85D20] hover:scale-110 hover:shadow-[0_4px_24px_rgba(232,93,32,.5)]',
+            : 'bg-[#1d70b7] hover:scale-110 hover:shadow-[0_4px_24px_rgba(232,93,32,.5)]',
         )}
       >
         {unread > 0 && !open && (
@@ -244,7 +244,7 @@ export function ChatWidget() {
         {/* Header */}
         <div className="bg-[#0A1628] text-white px-4 py-3 flex items-center gap-3 shrink-0">
           <div className="relative shrink-0">
-            <div className="w-9 h-9 rounded-full bg-[#E85D20] flex items-center justify-center text-base">🌴</div>
+            <div className="w-9 h-9 rounded-full bg-[#1d70b7] flex items-center justify-center text-base">🌴</div>
             <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#E8B94F] border-2 border-[#0A1628]" />
           </div>
           <div className="flex-1 min-w-0">
@@ -268,7 +268,7 @@ export function ChatWidget() {
                 className={cn(
                   'max-w-[88%] px-3.5 py-2.5 rounded-2xl text-sm leading-relaxed',
                   m.role === 'user'
-                    ? 'bg-[#E85D20] text-white rounded-br-sm'
+                    ? 'bg-[#1d70b7] text-white rounded-br-sm'
                     : 'bg-white text-[#101828] border border-[#EAECF0] rounded-bl-sm shadow-sm',
                 )}
                 dangerouslySetInnerHTML={{ __html: renderText(m.text) }}
@@ -288,7 +288,7 @@ export function ChatWidget() {
                     <TourMiniCard key={t.slug} tour={t} />
                   ))}
                   {m.tours.length > 3 && (
-                    <Link href="/excursiones" className="text-center text-xs text-[#E85D20] hover:underline py-0.5">
+                    <Link href="/excursiones" className="text-center text-xs text-[#1d70b7] hover:underline py-0.5">
                       Ver todas las excursiones →
                     </Link>
                   )}
@@ -302,7 +302,7 @@ export function ChatWidget() {
                     <button
                       key={si}
                       onClick={() => send(s)}
-                      className="text-xs bg-white border border-[#E85D20]/30 text-[#E85D20] px-2.5 py-1 rounded-full hover:bg-[#E85D20] hover:text-white transition-colors font-medium"
+                      className="text-xs bg-white border border-[#1d70b7]/30 text-[#1d70b7] px-2.5 py-1 rounded-full hover:bg-[#1d70b7] hover:text-white transition-colors font-medium"
                     >
                       {s}
                     </button>
@@ -357,12 +357,12 @@ export function ChatWidget() {
             onChange={e => setInput(e.target.value)}
             placeholder="Escribe tu mensaje..."
             disabled={loading}
-            className="flex-1 text-sm border border-[#EAECF0] rounded-full px-4 py-2 focus:outline-none focus:border-[#E85D20] text-[#101828] placeholder:text-[#667085] disabled:opacity-50 transition-colors bg-[#F9FAFB]"
+            className="flex-1 text-sm border border-[#EAECF0] rounded-full px-4 py-2 focus:outline-none focus:border-[#1d70b7] text-[#101828] placeholder:text-[#667085] disabled:opacity-50 transition-colors bg-[#F9FAFB]"
           />
           <button
             type="submit"
             disabled={!input.trim() || loading}
-            className="w-9 h-9 rounded-full bg-[#E85D20] hover:bg-[#E85D20]/90 text-white flex items-center justify-center shrink-0 disabled:opacity-40 transition-colors"
+            className="w-9 h-9 rounded-full bg-[#1d70b7] hover:bg-[#1d70b7]/90 text-white flex items-center justify-center shrink-0 disabled:opacity-40 transition-colors"
           >
             <svg viewBox="0 0 24 24" className="w-4 h-4 fill-white">
               <path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/>

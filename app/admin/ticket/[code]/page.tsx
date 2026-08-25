@@ -46,7 +46,7 @@ export default async function TicketPage({ params }: { params: Promise<{ code: s
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: Inter, system-ui, -apple-system, sans-serif; background: #f3f4f6; color: #111827; }
         .ticket { max-width: 680px; margin: 32px auto; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.10); }
-        .header { background: #E85D20; color: #fff; padding: 28px 32px 24px; }
+        .header { background: #1d70b7; color: #fff; padding: 28px 32px 24px; }
         .header-top { display: flex; align-items: flex-start; justify-content: space-between; }
         .company { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
         .company-sub { font-size: 11px; opacity: 0.85; margin-top: 2px; text-transform: uppercase; letter-spacing: 1px; }
@@ -74,7 +74,7 @@ export default async function TicketPage({ params }: { params: Promise<{ code: s
         .footer-right { font-size: 11px; color: #9CA3AF; text-align: right; }
         .print-btn { display: flex; gap: 10px; justify-content: center; margin: 24px auto 0; max-width: 680px; }
         .btn { padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
-        .btn-primary { background: #E85D20; color: #fff; }
+        .btn-primary { background: #1d70b7; color: #fff; }
         .btn-secondary { background: #fff; color: #374151; border: 1px solid #D1D5DB; }
         .notes-box { background: #F3F4F6; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #374151; margin-top: 16px; }
         .notes-box strong { font-size: 11px; color: #6B7280; display: block; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }

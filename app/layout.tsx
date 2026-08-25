@@ -161,8 +161,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="es" suppressHydrationWarning className={`${bricolage.variable} ${inter.variable}`}>
       <head>
-        <meta name="theme-color" content="#E85D20" media="(prefers-color-scheme: light)" />
-        <meta name="theme-color" content="#FF6B35" media="(prefers-color-scheme: dark)" />
+        <meta name="theme-color" content="#1d70b7" media="(prefers-color-scheme: light)" />
+        <meta name="theme-color" content="#2583d4" media="(prefers-color-scheme: dark)" />
         <WebsiteLd />
         {/* GA Consent Mode v2 — must run before gtag.js loads */}
         <script dangerouslySetInnerHTML={{ __html:

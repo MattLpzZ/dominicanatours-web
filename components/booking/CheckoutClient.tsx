@@ -193,7 +193,7 @@ function Step1({
                     value={slot.id}
                     checked={selectedSlotId === slot.id}
                     onChange={() => setSelectedSlotId(slot.id)}
-                    className="accent-[#E85D20]"
+                    className="accent-[#1d70b7]"
                   />
                   <span className="text-sm font-medium text-dt-text">
                     {new Date(slot.date + 'T12:00:00').toLocaleDateString('es-DO', {
@@ -532,7 +532,7 @@ function Step3({
                 value={m.id}
                 checked={paymentMethod === m.id}
                 onChange={() => setPaymentMethod(m.id)}
-                className="accent-[#E85D20]"
+                className="accent-[#1d70b7]"
               />
               <span className="text-lg">{m.icon}</span>
               <div>
@@ -550,7 +550,7 @@ function Step3({
           type="checkbox"
           checked={terms}
           onChange={e => setTerms(e.target.checked)}
-          className="mt-0.5 accent-[#E85D20] w-4 h-4 shrink-0"
+          className="mt-0.5 accent-[#1d70b7] w-4 h-4 shrink-0"
         />
         <span className="text-xs text-dt-text-2 leading-relaxed">
           He leído y acepto los{' '}

@@ -24,7 +24,7 @@ export default function OgImage() {
       >
         <div style={{ position: 'absolute', top: '-150px', right: '-150px', width: '500px', height: '500px', borderRadius: '50%', background: 'rgba(232,93,32,0.12)' }} />
         <div style={{ position: 'absolute', bottom: '-100px', left: '-100px', width: '400px', height: '400px', borderRadius: '50%', background: 'rgba(232,93,32,0.06)' }} />
-        <div style={{ position: 'absolute', top: '0', left: '0', right: '0', height: '3px', background: 'linear-gradient(90deg, #E85D20, #ff8c42, #E85D20)' }} />
+        <div style={{ position: 'absolute', top: '0', left: '0', right: '0', height: '3px', background: 'linear-gradient(90deg, #1d70b7, #2583d4, #1d70b7)' }} />
 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
           <div style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.38)', marginBottom: '20px' }}>
@@ -34,7 +34,7 @@ export default function OgImage() {
             <div style={{ fontSize: '88px', fontWeight: 800, color: '#ffffff', lineHeight: '0.95', letterSpacing: '-0.02em' }}>
               Dominicana
             </div>
-            <div style={{ fontSize: '88px', fontWeight: 800, color: '#E85D20', lineHeight: '0.95', letterSpacing: '-0.02em' }}>
+            <div style={{ fontSize: '88px', fontWeight: 800, color: '#1d70b7', lineHeight: '0.95', letterSpacing: '-0.02em' }}>
               Tour
             </div>
           </div>
