@@ -7,11 +7,13 @@ import { ScrollReveal } from '@/components/ui/ScrollReveal'
 import { CookieBanner } from '@/components/layout/CookieBanner'
 import { GaConsentRestorer } from '@/components/analytics/GaConsentRestorer'
 import { NoiseCanvas } from '@/components/layout/NoiseCanvas'
+import { TropicalScene } from '@/components/layout/TropicalScene'
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <NoiseCanvas />
+      <TropicalScene />
       <NavbarServer />
       <AnimatedMain>{children}</AnimatedMain>
       <ConditionalFooter><Footer /></ConditionalFooter>
