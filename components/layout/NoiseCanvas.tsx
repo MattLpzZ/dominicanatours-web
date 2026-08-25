@@ -1,86 +1,63 @@
-"use client"
-import { useEffect, useRef } from "react"
-
-const PALETTE: readonly [number, number, number][] = [
-  [29,  112, 183],
-  [20,  184, 166],
-  [56,  189, 248],
-  [96,  165, 250],
-  [14,  165, 233],
-]
+﻿"use client"
+import { useEffect } from "react"
 
 export function NoiseCanvas() {
-  const ref = useRef<HTMLCanvasElement>(null)
-
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
 
-    const canvas = ref.current!
-    const ctx = canvas.getContext("2d")!
-    const isDark = document.documentElement.classList.contains("dark")
-    const bg = isDark ? "#060A10" : "#FFFFFF"
-    const fade = isDark ? "rgba(6,10,16,0.022)" : "rgba(255,255,255,0.022)"
-
-    let W = 0, H = 0
-
-    function resize() {
-      W = canvas.width = window.innerWidth
-      H = canvas.height = window.innerHeight
-      ctx.fillStyle = bg
-      ctx.fillRect(0, 0, W, H)
+    const SIZE = 256
+    const offscreen = document.createElement("canvas")
+    offscreen.width = offscreen.height = SIZE
+    const ctx = offscreen.getContext("2d")!
+    const img = ctx.createImageData(SIZE, SIZE)
+    const d = img.data
+    for (let i = 0; i < d.length; i += 4) {
+      const v = (Math.random() * 255) | 0
+      d[i] = d[i + 1] = d[i + 2] = v
+      d[i + 3] = (Math.random() * 28 + 4) | 0
     }
-    resize()
+    ctx.putImageData(img, 0, 0)
+    const tileUrl = offscreen.toDataURL()
 
-    const N = Math.min(170, Math.floor((W * H) / 5500))
-    const pts = Array.from({ length: N }, () => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      size: Math.random() * 1.9 + 0.4,
-      speed: Math.random() * 0.55 + 0.15,
-      alpha: Math.random() * 0.24 + 0.04,
-      rgb: PALETTE[Math.floor(Math.random() * PALETTE.length)],
-    }))
-
-    let t = 0, raf = 0
-
-    function frame() {
-      ctx.fillStyle = fade
-      ctx.fillRect(0, 0, W, H)
-
-      const s = 0.0026
-      for (const p of pts) {
-        const a =
-          Math.sin(p.x * s + t * 0.38) * Math.PI * 2 +
-          Math.cos(p.y * s + t * 0.24) * Math.PI
-
-        p.x += Math.cos(a) * p.speed
-        p.y += Math.sin(a) * p.speed
-
-        if (p.x < -4) p.x = W + 4
-        if (p.x > W + 4) p.x = -4
-        if (p.y < -4) p.y = H + 4
-        if (p.y > H + 4) p.y = -4
-
-        ctx.beginPath()
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(${p.rgb[0]},${p.rgb[1]},${p.rgb[2]},${p.alpha})`
-        ctx.fill()
-      }
-
-      t += 0.0032
-      raf = requestAnimationFrame(frame)
+    if (!document.getElementById("grain-kf")) {
+      const s = document.createElement("style")
+      s.id = "grain-kf"
+      s.textContent = `
+        @keyframes grain-shift {
+          0%  { transform: translate(0,0) }
+          10% { transform: translate(-2%,-6%) }
+          20% { transform: translate(-9%,3%) }
+          30% { transform: translate(4%,-13%) }
+          40% { transform: translate(-3%,14%) }
+          50% { transform: translate(-9%,5%) }
+          60% { transform: translate(9%,0) }
+          70% { transform: translate(0,9%) }
+          80% { transform: translate(2%,19%) }
+          90% { transform: translate(-5%,5%) }
+        }
+      `
+      document.head.appendChild(s)
     }
 
-    frame()
-    window.addEventListener("resize", resize)
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", resize) }
+    const overlay = document.createElement("div")
+    overlay.setAttribute("data-grain", "true")
+    overlay.setAttribute("aria-hidden", "true")
+    Object.assign(overlay.style, {
+      position: "fixed",
+      inset: "-150%",
+      width: "400%",
+      height: "400%",
+      zIndex: "3",
+      pointerEvents: "none",
+      backgroundImage: `url(${tileUrl})`,
+      backgroundSize: `${SIZE}px ${SIZE}px`,
+      opacity: "0.09",
+      animation: "grain-shift 0.45s steps(1) infinite",
+    })
+    document.body.appendChild(overlay)
+
+    return () => overlay.remove()
   }, [])
 
-  return (
-    <canvas
-      ref={ref}
-      aria-hidden="true"
-      style={{ position: "fixed", inset: 0, zIndex: -1, pointerEvents: "none" }}
-    />
-  )
+  return null
 }

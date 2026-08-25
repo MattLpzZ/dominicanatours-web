@@ -3,16 +3,6 @@
 @tailwind utilities;
 
 
-/* ── Tropical animated background ───────────────────── */
-@keyframes tropical-bg {
-  0%,100% { background-position: -15% -20%,  115% 118%, 88%  8%; }
-  33%      { background-position:   5% -32%,   95% 105%, 95%  4%; }
-  66%      { background-position: -26%  8%,   110%  92%, 78% 20%; }
-}
-@media (prefers-reduced-motion: reduce) {
-  body { animation: none !important; }
-}
-
 /* ── CSS Design Tokens ───────────────────────────────── */
 
 :root {
@@ -64,7 +54,7 @@
 /* ── Floating sections on texture ────────────────────── */
 @layer components {
   .dt-sec {
-    background: transparent;
+    background: var(--color-bg);
     margin-bottom: 6px;
     position: relative;
   }
