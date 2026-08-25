@@ -6,10 +6,12 @@ import { AnimatedMain } from '@/components/ui/AnimatedMain'
 import { ScrollReveal } from '@/components/ui/ScrollReveal'
 import { CookieBanner } from '@/components/layout/CookieBanner'
 import { GaConsentRestorer } from '@/components/analytics/GaConsentRestorer'
+import { TropicalBackground } from '@/components/layout/TropicalBackground'
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
+        <TropicalBackground />
       <NavbarServer />
       <AnimatedMain>{children}</AnimatedMain>
       <ConditionalFooter><Footer /></ConditionalFooter>
