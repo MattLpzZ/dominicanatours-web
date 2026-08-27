@@ -3,6 +3,7 @@ name: Deploy to VPS
 on:
   push:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -43,9 +44,6 @@ jobs:
               -e SMTP_HOST="172.18.0.1" \
               -e SMTP_PORT="25" \
               -e SMTP_FROM="Dominicana Tour <info@dominicanatour.com>" \
-              -e PAYPAL_CLIENT_ID="${{ secrets.DT_PAYPAL_CLIENT_ID }}" \
-              -e PAYPAL_CLIENT_SECRET="${{ secrets.DT_PAYPAL_CLIENT_SECRET }}" \
-              -e PAYPAL_MODE="${{ secrets.DT_PAYPAL_MODE }}" \
               -e TELEGRAM_BOT_TOKEN="${{ secrets.DT_TELEGRAM_BOT_TOKEN }}" \
               -e TELEGRAM_CHAT_ID="${{ secrets.DT_TELEGRAM_CHAT_ID }}" \
               -e PORT=3000 \
