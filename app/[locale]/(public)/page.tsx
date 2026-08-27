@@ -202,7 +202,7 @@ export default async function LandingPage({ params }: Props) {
           <p className="text-base text-dt-text-3 mb-[34px] max-w-[440px] mx-auto leading-relaxed">
             {config.hero_subtitle || 'Descubre la República Dominicana con guías locales certificados.'}
           </p>
-          <HeroSearch />
+          <HeroSearch zones={zones.map(z => z.name)} />
         </div>
       </section>
 

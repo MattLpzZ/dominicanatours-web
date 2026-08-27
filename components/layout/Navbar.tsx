@@ -160,15 +160,10 @@ export function Navbar({ zones = [], categories = [] }: Props) {
               </svg>
             </button>
 
-            <Link href="/nosotros"
-              className={cn(
-                'flex items-center px-4 text-[13px] font-medium border-b-2 transition-colors',
-                pathname === '/nosotros'
-                  ? 'border-accent text-dt-text'
-                  : 'border-transparent text-dt-text-3 hover:text-dt-text hover:border-dt-border',
-              )}>
+            <a href="https://dominicantodo.com/" target="_blank" rel="noopener noreferrer"
+              className="flex items-center px-4 text-[13px] font-medium border-b-2 border-transparent text-dt-text-3 hover:text-dt-text hover:border-dt-border transition-colors">
               {t('navInspi')}
-            </Link>
+            </a>
 
           </div>
         </div>
@@ -280,10 +275,10 @@ export function Navbar({ zones = [], categories = [] }: Props) {
             className={cn('text-2xl font-display font-bold py-4 border-b border-dt-border transition-colors', pathname.startsWith('/excursiones') ? 'text-accent' : 'text-dt-text hover:text-accent')}>
             {t('navHacer')}
           </Link>
-          <Link href="/nosotros"
-            className={cn('text-2xl font-display font-bold py-4 border-b border-dt-border transition-colors', pathname === '/nosotros' ? 'text-accent' : 'text-dt-text hover:text-accent')}>
+          <a href="https://dominicantodo.com/" target="_blank" rel="noopener noreferrer"
+            className="text-2xl font-display font-bold py-4 border-b border-dt-border transition-colors text-dt-text hover:text-accent">
             {t('navInspi')}
-          </Link>
+          </a>
 
           <div className="mt-auto pt-8 flex flex-col gap-3">
             <Link href="/excursiones"

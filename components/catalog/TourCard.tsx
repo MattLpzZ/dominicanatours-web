@@ -3,22 +3,25 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { useState } from 'react'
 import type { ApiProduct } from '@/components/catalog/ExcursionesClient'
+import { CategoryIcon } from '@/components/ui/CategoryIcon'
 
-export function TourCard({ tour }: { tour: ApiProduct }) {
+export function TourCard({ tour, initialSaved = false, onSaveToggle }: { tour: ApiProduct; initialSaved?: boolean; onSaveToggle?: (slug: string, saved: boolean) => void }) {
   const coverImg = tour.cover_image
-  const [saved, setSaved] = useState(false)
+  const [saved, setSaved] = useState(initialSaved)
 
   async function handleSave(e: React.MouseEvent) {
     e.preventDefault(); e.stopPropagation()
-    setSaved(v => !v)
+    const next = !saved
+    setSaved(next)
+    onSaveToggle?.(tour.slug, next)
     try {
-      const res = await fetch('/api/saved', {
-        method: saved ? 'DELETE' : 'POST',
+      const res = await fetch('/api/wishlist', {
+        method: next ? 'POST' : 'DELETE',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ slug: tour.slug, name: tour.name, image: coverImg, price: tour.price_adult, categoryIcon: tour.category?.icon ?? '' }),
+        body: JSON.stringify({ slug: tour.slug, name: tour.name, imageUrl: coverImg, priceAdult: tour.price_adult, categoryIcon: tour.category?.icon ?? '' }),
       })
-      if (res.status === 401) { setSaved(false); window.location.href = '/cuenta' }
-    } catch { setSaved(v => !v) }
+      if (res.status === 401) { setSaved(false); onSaveToggle?.(tour.slug, false); window.location.href = '/cuenta' }
+    } catch { setSaved(!next); onSaveToggle?.(tour.slug, !next) }
   }
 
   return (
@@ -34,7 +37,7 @@ export function TourCard({ tour }: { tour: ApiProduct }) {
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center text-5xl">
-            {tour.category?.icon}
+            <CategoryIcon name={tour.category?.icon} className="w-5 h-5" />
           </div>
         )}
         {tour.featured && (

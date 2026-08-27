@@ -5,6 +5,7 @@ import { ReviewModal } from '@/components/tour/ReviewModal'
 import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
+import { CategoryIcon } from '@/components/ui/CategoryIcon'
 
 export const metadata: Metadata = {
   title: 'Mi Cuenta | Dominicana Tour',
@@ -108,22 +109,7 @@ export default async function CuentaPage() {
     }),
   ])
 
-  // Filter out saved tours whose Tour is deleted/inactive
-  const rawSaved = customer?.savedTours ?? []
-  let savedTours = rawSaved
-  if (rawSaved.length > 0) {
-    const slugs = rawSaved.map(t => t.tourSlug)
-    const active = await prisma.tour.findMany({
-      where: { slug: { in: slugs }, active: true },
-      select: { slug: true },
-    })
-    const activeSlugs = new Set(active.map(t => t.slug))
-    savedTours = rawSaved.filter(t => activeSlugs.has(t.tourSlug))
-    const orphaned = slugs.filter(s => !activeSlugs.has(s))
-    if (orphaned.length && customer) {
-      prisma.savedTour.deleteMany({ where: { customerId: customer.id, tourSlug: { in: orphaned } } }).catch(() => {})
-    }
-  }
+  const savedTours = customer?.savedTours ?? []
 
   const totalSpent = reservations
     .filter(r => r.status !== 'CANCELLED')
@@ -419,7 +405,9 @@ export default async function CuentaPage() {
                       <Image src={t.tourImage} alt={t.tourName} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
                     </div>
                   ) : (
-                    <div className="w-24 shrink-0 bg-dt-bg-2 flex items-center justify-center text-3xl">{t.categoryIcon || '🏝️'}</div>
+                    <div className="w-24 shrink-0 bg-dt-bg-2 flex items-center justify-center text-dt-text-3">
+                    <CategoryIcon name={t.categoryIcon || undefined} className="w-8 h-8" />
+                  </div>
                   )}
                   <div className="flex-1 min-w-0 p-3.5 flex flex-col justify-between gap-2">
                     <div>

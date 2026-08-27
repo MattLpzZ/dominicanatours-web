@@ -7,9 +7,9 @@ export const metadata: Metadata = {
 }
 
 const POPULAR = [
-  { slug: 'isla-saona-en-catamaran',            name: 'Isla Saona en Catamarán' },
-  { slug: '27-charcos-de-damajagua',            name: '27 Charcos de Damajagua' },
-  { slug: 'avistamiento-de-ballenas-jorobadas', name: 'Avistamiento de Ballenas' },
+  { slug: 'isla-saona-con-catamaran',       name: 'Isla Saona con Catamarán' },
+  { slug: 'ballenas-cayo-levantado',         name: 'Ballenas + Cayo Levantado' },
+  { slug: 'samana-full-day',                 name: 'Samaná Full Day' },
 ]
 
 export default function NotFound() {
@@ -42,7 +42,7 @@ export default function NotFound() {
           </h1>
           <p className="text-dt-text-2 text-base mb-8 max-w-sm mx-auto">
             La página que buscas fue movida, eliminada o nunca existió.
-            Pero tenemos más de 20 excursiones esperándote.
+            Pero tenemos más de 80 excursiones esperándote.
           </p>
 
           {/* Actions */}

@@ -1,104 +1,190 @@
-﻿"use client"
+"use client"
 import React from "react"
 
 const C = "#1d70b7"
 
-// Frond: filled tapered leaf, base at origin, tip at ~(0,-102)
-// Slightly asymmetric for natural look
-const FROND = "M0,0 C-7,-16 -11,-44 -8,-74 C-5,-86 -1,-98 0,-102 C1,-98 5,-86 8,-74 C11,-44 7,-16 0,0 Z"
+const PATH_7 =
+  "m166.11,401.67h-91.15c8.6-11.81,3.61-23.58.92-34.99-5.93-25.12-13.67-49.8-17.59-75.4-7.24-47.22-2.71-92.66," +
+  "20-135.44,5.09-9.6,11.5-18.29,19-27.46-6.99,1.16-12.82,3.2-18.7,5.1q-4.81,1.55-5.41-3.74c-3.91,4.44-7.56," +
+  "8.77-13.12,10.59-1.5.49-3.07,2.06-4.58.69-1.25-1.14-.08-2.83.03-4.28.09-1.13.59-2.28-.51-3.98-1.53,2.16-2.93," +
+  "4.11-4.3,6.09-3.58,5.2-8.36,9.01-13.89,11.93-2.92,1.54-4.7,1.49-4.32-2.69.3-3.38.06-6.81.06-11.62-3.45," +
+  "8.13-6.55,14.87-11.88,20.33-5.02,5.14-11.38,8.09-17.55,11.33-3.89,2.04-3.14-1.16-2.9-3.19,1.16-9.7,3.96-18.98," +
+  "8.49-27.57,12.23-23.2,30.77-37.22,57.71-38.46,5.59-.26,11.1,1.01,16.99,1.71-1.19-2.69-7.75-2.61-1.96-7.76-6.59," +
+  ".06-12.2-.35-17.14-3.38-1.23-.75-3.26-.87-3.38-2.58-.12-1.84,2.01-1.9,3.17-2.72,1.31-.93,3.09-1.2,4.26-3.13-4.05," +
+  ".31-7.78.66-11.51.86-5.44.28-10.55-1.18-15.57-3.1-2.79-1.07-3.54-2.3-.73-4.36,2.79-2.05,5.7-3.99,8.41-7.52-2.91," +
+  ".82-5.11,1.32-7.23,2.05-12.23,4.23-23.66,1.15-34.87-3.79-4.12-1.81-1.14-3.26.45-4.34,12.55-8.53,26.43-13.58," +
+  "41.58-14.1,27.48-.93,44.81,8.99,61.09,34.16,1.9-2.71-4.37-7.88,3.07-9.03-3.42-4.09-6.28-8.29-7.49-13.46-.8-3.43," +
+  "-.34-4.95,3.49-3.48,1.37.52,2.8.89,4.5.97-3.97-3.72-7.73-7.53-10.67-12.06-.18-.28-.37-.56-.51-.86-1.52-3.28-5-6.94," +
+  "-3.26-9.98,1.46-2.55,5.71.55,8.77.53.78,0,1.56,0,2.42,0-.21-1.78-1.48-2.14-2.43-2.64-10.96-5.81-16.44-15.62-19.92," +
+  "-26.97-.9-2.95-.83-4.68,2.98-3.63,29.91,8.22,54.55,33.77,53.07,65.42-.35,7.36-2.18,14.43-4.56,21.5,2.05.36,2.78-1.25," +
+  "3.79-2.1,26.69-22.42,58.41-18.45,82.82,1.17,4.56,3.67,8.74,7.71,12.31,12.37.89,1.16,2.4,2.3,1.78,3.87-.67,1.7-2.56," +
+  "1.12-4,1.26-12.46,1.21-23.88-1.24-33.59-9.64-.33-.28-.85-.33-1.78-.66.74,3.2,2.57,5.36,4.16,7.58,2.25,3.17,1.24,4.44," +
+  "-2.3,4.62-7.02.36-13.47-1.77-19.79-4.48-.86-.37-1.7-1.15-2.79-.53-.03.31-.2.7-.07.9,3.99,6.23,3.99,6.2-3.58,6.83-4.1," +
+  ".34-7.85-1.06-12.07-2.36,1.73,6.3-3.81,4.55-6.79,6.41,9.7,1.85,18.84,4.08,27.06,9.17,19.53,12.09,28.92,30.25,31.45," +
+  "52.42.93,8.11.82,16.3-.84,24.37-.33,1.6-.13,3.88-1.79,4.4-2.04.64-2.89-1.77-4.2-2.95-10.67-9.61-15.82-21.62-16.3," +
+  "-36.18-.96,3.03-1.97,6.05-2.86,9.1-1.48,5.1-1.69,5.14-5.41,1.59-6.58-6.26-9.25-14.45-11.29-22.91-1.5.05-1.09,1.12," +
+  "-1.26,1.79-.58,2.3.52,5.76-2.17,6.57-2.23.68-3.69-2.37-5.39-3.88-3.6-3.19-5.31-7.57-7.38-12.97-1.52,6.47-4.4,3.78," +
+  "-8.26.92,4.77,7.9,8.43,14.55,10.46,21.95,6.06,22.04.35,41.48-13.13,59.1-6.44,8.42-14.46,15.18-23.62,20.53-1.36.79," +
+  "-2.89,2.44-4.49,1.39-1.36-.9-.38-2.79-.34-4.24.35-13.24,4.67-24.77,14.61-33.89.58-.53,1.01-1.22,1.02-2.69-2.94,1.33," +
+  "-5.93,2.55-8.81,4.01-2.88,1.46-3.92.67-3.8-2.47.32-8.32,3.73-15.45,8.3-22.16.7-1.03,1.41-2.07,1.63-3.56-1.1.66-2.15," +
+  "1.43-3.31,1.97-1.73.81-3.1,3.49-5.07,2.32-1.5-.89-.51-3.42-.66-5.22-.44-5.41,1.96-10.03,4.69-15.44-6.09,2.61-5.39," +
+  "-1.4-5.56-4.58-.46-8.5-1.7-16.9-3.44-25.22-.33-1.57-.93-3.09-1.66-5.47-8.75,10.39-15.37,21.07-20.5,32.67-16.3," +
+  "36.85-16.81,74.92-8.52,113.61,4.77,22.26,12.57,43.5,21.94,64.19,3.23,7.13,6.48,14.26,10.01,21.24,9.74,19.23,24.34," +
+  "32.73,45.69,38.08.62.16,1.2.49,1.8.74,0,.28-.01.57-.02.85Z"
 
-// 11 fronds: angle (0=up, positive=clockwise), scale
-const FRONDS: { a: number; s: number }[] = [
-  { a: -138, s: 0.80 },  // far-left drooping
-  { a: -112, s: 0.92 },  // left horizontal
-  { a:  -88, s: 1.06 },  // upper-left
-  { a:  -62, s: 1.13 },  // steep upper-left
-  { a:  -36, s: 1.19 },  // near-vertical left
-  { a:   -8, s: 1.22 },  // near-vertical center
-  { a:   20, s: 1.19 },  // near-vertical right
-  { a:   46, s: 1.13 },  // upper-right
-  { a:   72, s: 1.06 },  // right
-  { a:   98, s: 0.90 },  // right drooping
-  { a:  122, s: 0.77 },  // far-right drooping
-]
-
-function PalmTree({ palmId, flip, style }: { palmId: string; flip?: boolean; style?: React.CSSProperties }) {
-  const cx = 130, cy = 155
-  const transforms = [flip ? "scaleX(-1)" : "", style?.transform ?? ""].filter(Boolean)
-  return (
-    <svg
-      viewBox="0 0 260 540"
-      aria-hidden="true"
-      style={{ ...style, transform: transforms.join(" ") || undefined }}
-    >
-      <defs>
-        <path id={palmId} d={FROND} />
-      </defs>
-
-      {/* Trunk — filled tapered shape, slightly curved */}
-      <path
-        d="M112,540 C110,458 114,376 116,302 C118,242 116,196 118,163
-           C120,149 124,143 130,141
-           C136,143 140,149 142,163
-           C144,196 142,242 144,302 C146,376 150,458 148,540 Z"
-        fill={C}
-      />
-
-      {/* Fronds via <use> at rotated positions */}
-      {FRONDS.map(({ a, s }, i) => (
-        <use
-          key={i}
-          href={`#${palmId}`}
-          transform={`translate(${cx},${cy}) rotate(${a}) scale(${s})`}
-          fill={C}
-        />
-      ))}
-
-      {/* Coconut cluster at crown */}
-      <circle cx={124} cy={162} r={9}  fill={C} />
-      <circle cx={135} cy={156} r={8}  fill={C} />
-      <circle cx={131} cy={168} r={7}  fill={C} />
-    </svg>
-  )
-}
+const PATH_6 =
+  "m193.5,168.53c-1.92,2.66-3.86,5.31-5.76,7.99-3.09,4.36-3.38,4.32-5.83-.66-3.49-7.09-4.41-14.6-3.7-22.38.15-1.64," +
+  ".38-3.27.68-5.84-2.29,1.97-2.73,4.05-3.67,5.79-.68,1.27-.81,3.3-2.61,3.29-1.68-.01-2.01-1.99-2.82-3.19-3.68-5.51," +
+  "-4.42-11.73-4.11-18.27-2.34.3-1.9,3.73-4.05,3.34-1.92-.35-2.44-2.57-3.47-4.02-4.95-6.91-9.79-13.89-15.47-20.24-.86," +
+  "-.96-1.51-2.16-3.14-2.62-2.05,7.44-1.78,14.97-2.22,22.34-1.99,32.96-1.52,65.92.45,98.88,1.22,20.44,2.06,40.91,3.3," +
+  "61.36,1.46,24.1,3.04,48.2,7.95,71.93,2.64,12.75,5.46,25.44,14.85,35.28-1.1,1.65-2.56,1.14-3.78,1.14-21,.04-41.99," +
+  ".05-62.99,0-1.39,0-3.31.73-4.03-.98-.57-1.35,1.07-2.28,1.74-3.36,6.22-10.06,7.93-21.49,9.78-32.82,2.9-17.77,4.15," +
+  "-35.74,4.96-53.7,1.31-28.95,1.94-57.93,2.53-86.91.72-35.13,1.92-70.28,9.28-104.85.29-1.36,1.23-3.3-.34-4.1-1.51-.77," +
+  "-2.67,1.02-3.66,2.02-4.2,4.27-8.31,8.64-12.42,13.01q-4.36,4.64-7.6-1.57c-.4,9.23-3.47,16.44-9.88,22.22-2.61-2.84," +
+  "-2.15-6.82-5.04-10.41-.14,3.04-.23,5.27-.34,7.49-.37,7.87-2.85,14.99-7.46,21.4-1.72,2.39-2.93,2.28-4.21-.34-1.64," +
+  "-3.38-3.43-6.69-6.01-9.72.22,4.71.53,9.43.64,14.14.26,11.39-6.03,20.23-11.82,29.16-1.9,2.93-2.91.12-3.6-1.39-3.98," +
+  "-8.74-6.08-17.99-6.83-27.52-2.74-34.73,13.79-63.38,47.17-74.96.73-.25,1.67-.25,2-1.33-2.29-1.53-9.7,2.57-5.47-6.33," +
+  "-6.14,3.7-11.42,6.97-17.86,6.74-1.58-.06-3.62.88-4.6-.84-.86-1.49.88-2.67,1.49-3.98.6-1.29,1.21-2.57,1.17-4.41-2.97," +
+  "1.99-5.89,4.05-8.91,5.97-5.16,3.27-10.76,5.21-16.91,5.51-2.58.12-3.37-.64-2.3-3.17,1.46-3.47,2.72-7.02,4.07-10.54," +
+  "-.45-.35-.9-.7-1.35-1.04-2.62,2.88-5.18,5.81-7.85,8.64-8.31,8.79-19.52,10.31-30.61,11.69-4.63.58-2.5-2.83-1.6-4.62," +
+  "5.78-11.46,13.5-21.51,23.67-29.33,24.03-18.49,49.74-21.93,77.1-7.61.73.38,1.48.7,2.66,1.25-.07-3.27-7.67-6.83,1.54," +
+  "-9.1-7.19-1.71-12.58-4.39-16.83-9.23-2.29-2.6-2.29-3.86,1.35-4.37,1.97-.28,3.92-.71,6.08-1.11-1.39-1.67-3.25-1.37," +
+  "-4.83-1.69-7.68-1.53-14.6-4.53-20.42-9.89-2.38-2.19-2.11-3.38,1.01-4.3,3.49-1.03,6.91-2.33,10.32-4.68-2.13,0-4.26," +
+  "-.07-6.38.01-13.44.51-23.38-6.59-32.7-15-2.9-2.62-.37-3.22,1.63-3.73,17.44-4.46,34.65-4.15,51.44,2.87,22.62,9.46," +
+  "34.7,27.11,39,50.7.11.6.2,1.2.46,2.73,3.02-9.31,6.32-17.5,11.8-24.53,16.08-20.61,37.78-27.29,62.94-24.93,8,.75,15.71," +
+  "2.86,23.11,6.09,3.14,1.37,3.41,2.32.35,4.47-11.98,8.42-24.81,12.82-39.97,10.06,1.41.81,2.8,1.65,4.24,2.42,1.62.86," +
+  "3.25,1.71,4.92,2.45,3.21,1.42,3.17,2.82.32,4.77-7.31,5-15.45,6.83-24.16,6.71-.65,0-1.3.1-2.23,1,2.24.75,4.45,1.61," +
+  "6.74,2.21,3.02.79,3.14,1.86.79,3.81-5.14,4.25-10.83,7.06-18.11,6.97q3.93,3-.11,9.36c6.54-2,12.65-4,19.06-4.9,19.01," +
+  "-2.68,35.65,3.01,50.39,14.56,13.44,10.54,22.72,24.22,28.04,40.51.44,1.35,1.72,2.96.35,4.15-1.26,1.09-2.81-.25-4.22," +
+  "-.57-15.02-3.46-26.85-11.34-34.51-25.17-.4,4.04.78,7.6,1.83,11.14,1.05,3.55.1,4.59-3.52,3.62-9.03-2.41-16.16-7.67," +
+  "-22.35-14.44-.66-.72-1.32-1.44-2.49-1.91.96,2.42,1.77,4.91,2.91,7.24,1.75,3.57.33,3.92-2.88,3.43-6.85-1.04-12.61," +
+  "-4.07-18.41-10.21,2.74,7.85-1.2,7.29-5.63,6.85,2.35,1.34,4.73,2.63,7.03,4.04,29.46,18.12,40.72,52.1,28.63,86.47-2.1," +
+  "5.98-4.42,11.87-7.9,17.23-.7,1.07-1.15,2.74-2.77,2.47-1.22-.2-1.41-1.72-1.96-2.72-7.52-13.68-9.44-27.91-3.76-42.91," +
+  "-.43-.15-.86-.29-1.29-.44Z"
 
 function Birds({ x, y, scale = 1 }: { x: number; y: number; scale?: number }) {
   return (
     <g transform={`translate(${x},${y}) scale(${scale})`}>
-      <path d="M0,0 C9,-8 18,-8 26,0 C34,-8 43,-8 52,0" stroke={C} strokeWidth="2" fill="none" strokeLinecap="round" />
+      <path d="M0,0 C9,-8 18,-8 26,0 C34,-8 43,-8 52,0"
+        stroke={C} strokeWidth="2" fill="none" strokeLinecap="round" />
     </g>
   )
 }
 
+// Shared palm styles
+const palmBase: React.CSSProperties = {
+  position: "absolute",
+  bottom: 0,
+  width: "auto",
+}
+
 export function TropicalScene() {
   return (
-    <div aria-hidden="true" style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", overflow: "hidden" }}>
+    <div aria-hidden="true"
+      style={{ position: "fixed", inset: 0, zIndex: 1, pointerEvents: "none", overflow: "hidden" }}>
 
-      {/* LEFT palm */}
-      <PalmTree palmId="pl" style={{ position: "absolute", left: -28, bottom: 0, height: "65vh", minHeight: 340, maxHeight: 620, opacity: 0.075 }} />
+      <style>{`
+        @keyframes palm-sway {
+          0%, 100% { transform: rotate(-1.5deg); }
+          50%       { transform: rotate(2deg);    }
+        }
+        @keyframes palm-sway-flip {
+          0%, 100% { transform: scaleX(-1) rotate(-1.5deg); }
+          50%       { transform: scaleX(-1) rotate(2deg);    }
+        }
+        @keyframes palm-sway-sm {
+          0%, 100% { transform: rotate(-1deg); }
+          50%       { transform: rotate(1.4deg);    }
+        }
+        @keyframes palm-sway-flip-sm {
+          0%, 100% { transform: scaleX(-1) rotate(-1deg); }
+          50%       { transform: scaleX(-1) rotate(1.4deg);    }
+        }
+        .palm-l   { transform-origin: bottom center; animation: palm-sway         6s   ease-in-out infinite; }
+        .palm-l2  { transform-origin: bottom center; animation: palm-sway-sm      7.5s ease-in-out infinite 1s; }
+        .palm-l3  { transform-origin: bottom center; animation: palm-sway-sm      5s   ease-in-out infinite 2.5s; }
+        .palm-r   { transform-origin: bottom center; animation: palm-sway-flip    8s   ease-in-out infinite 1.5s; }
+        .palm-r2  { transform-origin: bottom center; animation: palm-sway-flip-sm 6s   ease-in-out infinite 0.5s; }
+        .palm-r3  { transform-origin: bottom center; animation: palm-sway-flip-sm 9s   ease-in-out infinite 3s; }
+        .palm-r4  { transform-origin: bottom center; animation: palm-sway-flip-sm 4.5s ease-in-out infinite 2s; }
+        @media (prefers-reduced-motion: reduce) {
+          .palm-l, .palm-l2, .palm-l3  { animation: none; transform: none; }
+          .palm-r, .palm-r2, .palm-r3, .palm-r4 { animation: none; transform: scaleX(-1); }
+        }
+        @media (max-width: 640px) {
+          .palm-l2, .palm-l3, .palm-r3, .palm-r4 { display: none; }
+        }
+      `}</style>
 
-      {/* RIGHT palm large */}
-      <PalmTree palmId="pr" flip style={{ position: "absolute", right: -28, bottom: 0, height: "58vh", minHeight: 300, maxHeight: 560, opacity: 0.065 }} />
+      {/* ── LEFT SIDE ─────────────────────────────────────── */}
 
-      {/* RIGHT palm small */}
-      <PalmTree palmId="pr2" flip style={{ position: "absolute", right: 88, bottom: 0, height: "36vh", minHeight: 190, maxHeight: 360, opacity: 0.038 }} />
+      {/* Left main — grande */}
+      <svg viewBox="0 0 240.3 401.67" aria-hidden="true" className="palm-l"
+        style={{ ...palmBase, left: -8, height: "44vh", minHeight: 200, maxHeight: 440, opacity: 0.072 }}>
+        <path d={PATH_7} fill={C} />
+      </svg>
 
-      {/* OCEAN WAVES */}
+      {/* Left 2nd — mediana */}
+      <svg viewBox="0 0 240.3 401.67" aria-hidden="true" className="palm-l2"
+        style={{ ...palmBase, left: 55, height: "22vh", minHeight: 100, maxHeight: 220, opacity: 0.042 }}>
+        <path d={PATH_7} fill={C} />
+      </svg>
+
+      {/* Left 3rd — pequeña */}
+      <svg viewBox="0 0 240.3 401.67" aria-hidden="true" className="palm-l3"
+        style={{ ...palmBase, left: 110, height: "13vh", minHeight: 62, maxHeight: 130, opacity: 0.026 }}>
+        <path d={PATH_7} fill={C} />
+      </svg>
+
+      {/* ── RIGHT SIDE ────────────────────────────────────── */}
+
+      {/* Right main — grande (PATH_6 flipped) */}
+      <svg viewBox="0 0 265.44 402.79" aria-hidden="true" className="palm-r"
+        style={{ ...palmBase, right: -8, height: "40vh", minHeight: 180, maxHeight: 400, opacity: 0.060 }}>
+        <path d={PATH_6} fill={C} />
+      </svg>
+
+      {/* Right 2nd — mediana (PATH_7 flipped) */}
+      <svg viewBox="0 0 240.3 401.67" aria-hidden="true" className="palm-r2"
+        style={{ ...palmBase, right: 62, height: "21vh", minHeight: 96, maxHeight: 210, opacity: 0.036 }}>
+        <path d={PATH_7} fill={C} />
+      </svg>
+
+      {/* Right 3rd — pequeña */}
+      <svg viewBox="0 0 240.3 401.67" aria-hidden="true" className="palm-r3"
+        style={{ ...palmBase, right: 130, height: "13vh", minHeight: 58, maxHeight: 128, opacity: 0.024 }}>
+        <path d={PATH_7} fill={C} />
+      </svg>
+
+      {/* Right 4th — mini */}
+      <svg viewBox="0 0 240.3 401.67" aria-hidden="true" className="palm-r4"
+        style={{ ...palmBase, right: 196, height: "9vh", minHeight: 42, maxHeight: 90, opacity: 0.018 }}>
+        <path d={PATH_7} fill={C} />
+      </svg>
+
+      {/* ── AMBIENTE ──────────────────────────────────────── */}
+
+      {/* Ocean waves */}
       <svg viewBox="0 0 1440 110" preserveAspectRatio="none"
         style={{ position: "absolute", bottom: 0, left: 0, right: 0, width: "100%", height: 110 }}>
-        <path d="M0,55 C200,20 400,90 600,55 C800,22 1000,85 1200,55 C1320,38 1440,62 1440,62 L1440,110 L0,110 Z" fill={C} opacity="0.045" />
-        <path d="M0,72 C240,42 480,98 720,72 C960,46 1200,90 1440,72 L1440,110 L0,110 Z" fill={C} opacity="0.030" />
-        <path d="M0,88 C300,68 600,105 900,88 C1100,76 1300,96 1440,88 L1440,110 L0,110 Z" fill={C} opacity="0.020" />
+        <path d="M0,55 C200,20 400,90 600,55 C800,22 1000,85 1200,55 C1320,38 1440,62 1440,62 L1440,110 L0,110 Z"
+          fill={C} opacity="0.045" />
+        <path d="M0,72 C240,42 480,98 720,72 C960,46 1200,90 1440,72 L1440,110 L0,110 Z"
+          fill={C} opacity="0.030" />
+        <path d="M0,88 C300,68 600,105 900,88 C1100,76 1300,96 1440,88 L1440,110 L0,110 Z"
+          fill={C} opacity="0.020" />
       </svg>
 
-      {/* MOUNTAIN SILHOUETTE */}
+      {/* Mountains */}
       <svg viewBox="0 0 1440 80" preserveAspectRatio="none"
         style={{ position: "absolute", bottom: 90, left: 0, right: 0, width: "100%", height: 80, opacity: 0.026 }}>
-        <path d="M0,80 L180,18 L340,55 L520,5 L680,45 L860,12 L1020,50 L1180,8 L1360,40 L1440,22 L1440,80 Z" fill={C} />
+        <path d="M0,80 L180,18 L340,55 L520,5 L680,45 L860,12 L1020,50 L1180,8 L1360,40 L1440,22 L1440,80 Z"
+          fill={C} />
       </svg>
 
-      {/* BIRDS — top right cluster */}
-      <svg viewBox="0 0 300 160" style={{ position: "absolute", top: "12%", right: "6%", width: 220, opacity: 0.072 }}>
+      {/* Birds top-right */}
+      <svg viewBox="0 0 300 160"
+        style={{ position: "absolute", top: "12%", right: "6%", width: 220, opacity: 0.072 }}>
         <Birds x={30}  y={30}  scale={1.4} />
         <Birds x={100} y={18}  scale={1.1} />
         <Birds x={170} y={42}  scale={0.9} />
@@ -108,34 +194,38 @@ export function TropicalScene() {
         <Birds x={200} y={22}  scale={0.6} />
       </svg>
 
-      {/* BIRDS — top left sparse */}
-      <svg viewBox="0 0 200 120" style={{ position: "absolute", top: "18%", left: "8%", width: 160, opacity: 0.052 }}>
+      {/* Birds top-left */}
+      <svg viewBox="0 0 200 120"
+        style={{ position: "absolute", top: "18%", left: "8%", width: 160, opacity: 0.052 }}>
         <Birds x={20}  y={40} scale={1.0} />
         <Birds x={90}  y={25} scale={0.8} />
         <Birds x={150} y={55} scale={0.65} />
       </svg>
 
-      {/* COMPASS ROSE */}
-      <svg viewBox="0 0 100 100" style={{ position: "absolute", bottom: 130, right: 32, width: 88, opacity: 0.065 }}>
+      {/* Compass rose */}
+      <svg viewBox="0 0 100 100"
+        style={{ position: "absolute", bottom: 130, right: 32, width: 88, opacity: 0.065 }}>
         <circle cx="50" cy="50" r="46" fill="none" stroke={C} strokeWidth="0.8" />
         <circle cx="50" cy="50" r="34" fill="none" stroke={C} strokeWidth="0.4" />
-        <circle cx="50" cy="50" r="5"  fill={C} opacity="0.5" />
-        <line x1="50" y1="4"  x2="50" y2="16" stroke={C} strokeWidth="2"   strokeLinecap="round" />
-        <line x1="50" y1="84" x2="50" y2="96" stroke={C} strokeWidth="2"   strokeLinecap="round" />
-        <line x1="4"  y1="50" x2="16" y2="50" stroke={C} strokeWidth="2"   strokeLinecap="round" />
-        <line x1="84" y1="50" x2="96" y2="50" stroke={C} strokeWidth="2"   strokeLinecap="round" />
-        <line x1="18" y1="18" x2="24" y2="24" stroke={C} strokeWidth="1"   strokeLinecap="round" />
-        <line x1="76" y1="18" x2="82" y2="24" stroke={C} strokeWidth="1"   strokeLinecap="round" />
-        <line x1="18" y1="82" x2="24" y2="76" stroke={C} strokeWidth="1"   strokeLinecap="round" />
-        <line x1="76" y1="82" x2="82" y2="76" stroke={C} strokeWidth="1"   strokeLinecap="round" />
+        <circle cx="50" cy="50" r="5" fill={C} opacity="0.5" />
+        <line x1="50" y1="4"  x2="50" y2="16" stroke={C} strokeWidth="2" strokeLinecap="round" />
+        <line x1="50" y1="84" x2="50" y2="96" stroke={C} strokeWidth="2" strokeLinecap="round" />
+        <line x1="4"  y1="50" x2="16" y2="50" stroke={C} strokeWidth="2" strokeLinecap="round" />
+        <line x1="84" y1="50" x2="96" y2="50" stroke={C} strokeWidth="2" strokeLinecap="round" />
+        <line x1="18" y1="18" x2="24" y2="24" stroke={C} strokeWidth="1" strokeLinecap="round" />
+        <line x1="76" y1="18" x2="82" y2="24" stroke={C} strokeWidth="1" strokeLinecap="round" />
+        <line x1="18" y1="82" x2="24" y2="76" stroke={C} strokeWidth="1" strokeLinecap="round" />
+        <line x1="76" y1="82" x2="82" y2="76" stroke={C} strokeWidth="1" strokeLinecap="round" />
         <path d="M50,18 L54,50 L50,58 L46,50 Z" fill={C} />
         <path d="M50,82 L54,50 L50,58 L46,50 Z" fill={C} opacity="0.3" />
-        <text x="50" y="11" textAnchor="middle" fontSize="7" fontWeight="bold" fill={C} fontFamily="sans-serif">N</text>
+        <text x="50" y="11" textAnchor="middle" fontSize="7" fontWeight="bold"
+          fill={C} fontFamily="sans-serif">N</text>
       </svg>
 
-      {/* TROPICAL LEAF accent — top-left corner */}
+      {/* Tropical leaf accent */}
       <svg viewBox="0 0 120 120"
-        style={{ position: "absolute", top: -10, left: -10, width: 130, opacity: 0.048, transform: "rotate(25deg)" }}>
+        style={{ position: "absolute", top: -10, left: -10, width: 130,
+          opacity: 0.048, transform: "rotate(25deg)" }}>
         <path d="M10,110 Q-10,60 30,20 Q50,-5 90,10 Q50,15 35,40 Q20,70 30,110 Z" fill={C} />
         <path d="M10,110 Q40,70 90,10" stroke={C} strokeWidth="1.5" fill="none" opacity="0.5" />
       </svg>

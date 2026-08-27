@@ -5,7 +5,6 @@ const mysql = require('mysql2/promise')
 const jwt = require('jsonwebtoken')
 
 const app = express()
-app.set('trust proxy', 1)
 app.use(cors())
 app.use(express.json())
 
@@ -1307,122 +1306,97 @@ app.use((err, req, res, _next) => {
 
 const PORT = parseInt(process.env.PORT || '3000')
 
-// Safety net: prevent unhandled rejections from crashing the process
-process.on('unhandledRejection', (err) => {
-  console.error('[unhandledRejection]', err && err.message)
-})
-
 // ── Tour Images ───────────────────────────────────────────────────────────────
 app.post('/v3/admin/tours/:id/images', requireAdmin, async (req, res) => {
-  try {
-    const { url, alt = '', order = 0 } = req.body
-    const [r] = await pool.query(
-      'INSERT INTO TourImage (tourId,url,alt,`order`) VALUES (?,?,?,?)',
-      [req.params.id, url, alt, order]
-    )
-    res.json({ ok: true, id: r.insertId, url, alt, order })
-  } catch (e) { res.status(500).json({ error: e.message }) }
+  const { url, alt = '', order = 0 } = req.body
+  const [r] = await pool.query(
+    'INSERT INTO TourImage (tourId,url,alt,`order`) VALUES (?,?,?,?)',
+    [req.params.id, url, alt, order]
+  )
+  res.json({ ok: true, id: r.insertId, url, alt, order })
 })
 
 app.put('/v3/admin/tours/:id/images/:imgId', requireAdmin, async (req, res) => {
-  try {
-    const { url, alt, order } = req.body
-    const fields = [], vals = []
-    if (url !== undefined) { fields.push('url=?'); vals.push(url) }
-    if (alt !== undefined) { fields.push('alt=?'); vals.push(alt) }
-    if (order !== undefined) { fields.push('`order`=?'); vals.push(order) }
-    if (!fields.length) return res.status(400).json({ error: 'Nothing to update' })
-    vals.push(req.params.imgId)
-    await pool.query(`UPDATE TourImage SET ${fields.join(',')} WHERE id=?`, vals)
-    res.json({ ok: true })
-  } catch (e) { res.status(500).json({ error: e.message }) }
+  const { url, alt, order } = req.body
+  const fields = [], vals = []
+  if (url !== undefined) { fields.push('url=?'); vals.push(url) }
+  if (alt !== undefined) { fields.push('alt=?'); vals.push(alt) }
+  if (order !== undefined) { fields.push('`order`=?'); vals.push(order) }
+  if (!fields.length) return res.status(400).json({ error: 'Nothing to update' })
+  vals.push(req.params.imgId)
+  await pool.query(`UPDATE TourImage SET ${fields.join(',')} WHERE id=?`, vals)
+  res.json({ ok: true })
 })
 
 app.delete('/v3/admin/tours/:id/images/:imgId', requireAdmin, async (req, res) => {
-  try {
-    await pool.query('DELETE FROM TourImage WHERE id=? AND tourId=?', [req.params.imgId, req.params.id])
-    res.json({ ok: true })
-  } catch (e) { res.status(500).json({ error: e.message }) }
+  await pool.query('DELETE FROM TourImage WHERE id=? AND tourId=?', [req.params.imgId, req.params.id])
+  res.json({ ok: true })
 })
 
 // ── Tour Itinerary ────────────────────────────────────────────────────────────
 app.post('/v3/admin/tours/:id/itinerary', requireAdmin, async (req, res) => {
-  try {
-    const { time = '', title, description = '', order = 0 } = req.body
-    const [r] = await pool.query(
-      'INSERT INTO ItineraryItem (tourId,time,title,description,`order`) VALUES (?,?,?,?,?)',
-      [req.params.id, time, title, description, order]
-    )
-    res.json({ ok: true, id: r.insertId, time, title, description, order })
-  } catch (e) { res.status(500).json({ error: e.message }) }
+  const { time = '', title, description = '', order = 0 } = req.body
+  const [r] = await pool.query(
+    'INSERT INTO ItineraryItem (tourId,time,title,description,`order`) VALUES (?,?,?,?,?)',
+    [req.params.id, time, title, description, order]
+  )
+  res.json({ ok: true, id: r.insertId, time, title, description, order })
 })
 
 app.put('/v3/admin/tours/:id/itinerary/:itemId', requireAdmin, async (req, res) => {
-  try {
-    const { time, title, description, order } = req.body
-    const fields = [], vals = []
-    if (time !== undefined) { fields.push('time=?'); vals.push(time) }
-    if (title !== undefined) { fields.push('title=?'); vals.push(title) }
-    if (description !== undefined) { fields.push('description=?'); vals.push(description) }
-    if (order !== undefined) { fields.push('`order`=?'); vals.push(order) }
-    if (!fields.length) return res.status(400).json({ error: 'Nothing to update' })
-    vals.push(req.params.itemId)
-    await pool.query(`UPDATE ItineraryItem SET ${fields.join(',')} WHERE id=?`, vals)
-    res.json({ ok: true })
-  } catch (e) { res.status(500).json({ error: e.message }) }
+  const { time, title, description, order } = req.body
+  const fields = [], vals = []
+  if (time !== undefined) { fields.push('time=?'); vals.push(time) }
+  if (title !== undefined) { fields.push('title=?'); vals.push(title) }
+  if (description !== undefined) { fields.push('description=?'); vals.push(description) }
+  if (order !== undefined) { fields.push('`order`=?'); vals.push(order) }
+  if (!fields.length) return res.status(400).json({ error: 'Nothing to update' })
+  vals.push(req.params.itemId)
+  await pool.query(`UPDATE ItineraryItem SET ${fields.join(',')} WHERE id=?`, vals)
+  res.json({ ok: true })
 })
 
 app.delete('/v3/admin/tours/:id/itinerary/:itemId', requireAdmin, async (req, res) => {
-  try {
-    await pool.query('DELETE FROM ItineraryItem WHERE id=? AND tourId=?', [req.params.itemId, req.params.id])
-    res.json({ ok: true })
-  } catch (e) { res.status(500).json({ error: e.message }) }
+  await pool.query('DELETE FROM ItineraryItem WHERE id=? AND tourId=?', [req.params.itemId, req.params.id])
+  res.json({ ok: true })
 })
 
 // ── Tour Includes ─────────────────────────────────────────────────────────────
 app.post('/v3/admin/tours/:id/includes', requireAdmin, async (req, res) => {
-  try {
-    const { text, included = true } = req.body
-    const [r] = await pool.query(
-      'INSERT INTO TourInclude (tourId,text,included) VALUES (?,?,?)',
-      [req.params.id, text, included ? 1 : 0]
-    )
-    res.json({ ok: true, id: r.insertId, text, included: !!included })
-  } catch (e) { res.status(500).json({ error: e.message }) }
+  const { text, included = true } = req.body
+  const [r] = await pool.query(
+    'INSERT INTO TourInclude (tourId,text,included) VALUES (?,?,?)',
+    [req.params.id, text, included ? 1 : 0]
+  )
+  res.json({ ok: true, id: r.insertId, text, included: !!included })
 })
 
 app.put('/v3/admin/tours/:id/includes/:incId', requireAdmin, async (req, res) => {
-  try {
-    const { text, included } = req.body
-    const fields = [], vals = []
-    if (text !== undefined) { fields.push('text=?'); vals.push(text) }
-    if (included !== undefined) { fields.push('included=?'); vals.push(included ? 1 : 0) }
-    if (!fields.length) return res.status(400).json({ error: 'Nothing to update' })
-    vals.push(req.params.incId)
-    await pool.query(`UPDATE TourInclude SET ${fields.join(',')} WHERE id=?`, vals)
-    res.json({ ok: true })
-  } catch (e) { res.status(500).json({ error: e.message }) }
+  const { text, included } = req.body
+  const fields = [], vals = []
+  if (text !== undefined) { fields.push('text=?'); vals.push(text) }
+  if (included !== undefined) { fields.push('included=?'); vals.push(included ? 1 : 0) }
+  if (!fields.length) return res.status(400).json({ error: 'Nothing to update' })
+  vals.push(req.params.incId)
+  await pool.query(`UPDATE TourInclude SET ${fields.join(',')} WHERE id=?`, vals)
+  res.json({ ok: true })
 })
 
 app.delete('/v3/admin/tours/:id/includes/:incId', requireAdmin, async (req, res) => {
-  try {
-    await pool.query('DELETE FROM TourInclude WHERE id=? AND tourId=?', [req.params.incId, req.params.id])
-    res.json({ ok: true })
-  } catch (e) { res.status(500).json({ error: e.message }) }
+  await pool.query('DELETE FROM TourInclude WHERE id=? AND tourId=?', [req.params.incId, req.params.id])
+  res.json({ ok: true })
 })
 
 // ── Tour Date update ──────────────────────────────────────────────────────────
 app.patch('/v3/admin/tours/:id/dates/:dateId', requireAdmin, async (req, res) => {
-  try {
-    const { availableSpots, status } = req.body
-    const fields = [], vals = []
-    if (availableSpots !== undefined) { fields.push('availableSpots=?'); vals.push(availableSpots) }
-    if (status !== undefined) { fields.push('status=?'); vals.push(status) }
-    if (!fields.length) return res.status(400).json({ error: 'Nothing to update' })
-    vals.push(req.params.dateId, req.params.id)
-    await pool.query(`UPDATE TourDate SET ${fields.join(',')} WHERE id=? AND tourId=?`, vals)
-    res.json({ ok: true })
-  } catch (e) { res.status(500).json({ error: e.message }) }
+  const { availableSpots, status } = req.body
+  const fields = [], vals = []
+  if (availableSpots !== undefined) { fields.push('availableSpots=?'); vals.push(availableSpots) }
+  if (status !== undefined) { fields.push('status=?'); vals.push(status) }
+  if (!fields.length) return res.status(400).json({ error: 'Nothing to update' })
+  vals.push(req.params.dateId, req.params.id)
+  await pool.query(`UPDATE TourDate SET ${fields.join(',')} WHERE id=? AND tourId=?`, vals)
+  res.json({ ok: true })
 })
 
 // ── ERP Create Reservation ────────────────────────────────────────────────────
@@ -1486,19 +1460,45 @@ app.post('/v3/admin/reservations', requireAdmin, async (req, res) => {
 
 // ── Users CRUD ────────────────────────────────────────────────────────────────
 app.get('/v3/admin/users/list', requireAdmin, async (req, res) => {
-  try {
-    const [rows] = await pool.query(
-      'SELECT id, name AS firstName, lastName, email, role, active, lastLogin, createdAt FROM User ORDER BY createdAt DESC'
-    )
-    res.json(rows.map(u => ({ ...u, active: u.active === 1 || u.active === true })))
-  } catch (e) { res.status(500).json({ error: e.message }) }
+  const [rows] = await pool.query(
+    'SELECT id, name AS firstName, lastName, email, role, active, lastLogin, createdAt FROM User ORDER BY createdAt DESC'
+  )
+  res.json(rows.map(u => ({ ...u, active: u.active === 1 || u.active === true })))
 })
 
 app.post('/v3/admin/users/create', requireAdmin, async (req, res) => {
+  const { email, password, firstName, lastName = null, role = 'ADMIN' } = req.body
+  if (!email || !password || !firstName)
+    return res.status(400).json({ error: 'email, password y firstName son requeridos' })
+  // Check if bcrypt available, fallback to sha256-like static hash if not
+  let hash
   try {
-    const { email, password, firstName, lastName = null, role = 'ADMIN' } = req.body
-    if (!email || !password || !firstName)
-      return res.status(400).json({ error: 'email, password y firstName son requeridos' })
+    const bcrypt = require('bcryptjs')
+    hash = await bcrypt.hash(password, 12)
+  } catch {
+    try {
+      const bcrypt = require('bcrypt')
+      hash = await bcrypt.hash(password, 12)
+    } catch {
+      const crypto = require('crypto')
+      hash = '$plain$' + crypto.createHash('sha256').update(password).digest('hex')
+    }
+  }
+  const [r] = await pool.query(
+    'INSERT INTO User (name, lastName, email, password, role, active) VALUES (?,?,?,?,?,1)',
+    [firstName, lastName, email, hash, role.toUpperCase()]
+  )
+  const [[row]] = await pool.query('SELECT id, name AS firstName, lastName, email, role, active, lastLogin, createdAt FROM User WHERE id=?', [r.insertId])
+  res.status(201).json({ ...row, active: !!row.active })
+})
+
+app.put('/v3/admin/users/:id', requireAdmin, async (req, res) => {
+  const { firstName, lastName, role, password } = req.body
+  const fields = [], vals = []
+  if (firstName) { fields.push('name=?'); vals.push(firstName) }
+  if (lastName !== undefined) { fields.push('lastName=?'); vals.push(lastName) }
+  if (role) { fields.push('role=?'); vals.push(role.toUpperCase()) }
+  if (password) {
     let hash
     try {
       const bcrypt = require('bcryptjs')
@@ -1512,81 +1512,24 @@ app.post('/v3/admin/users/create', requireAdmin, async (req, res) => {
         hash = '$plain$' + crypto.createHash('sha256').update(password).digest('hex')
       }
     }
-    const [r] = await pool.query(
-      'INSERT INTO User (name, lastName, email, password, role, active) VALUES (?,?,?,?,?,1)',
-      [firstName, lastName, email, hash, role.toUpperCase()]
-    )
-    const [[row]] = await pool.query('SELECT id, name AS firstName, lastName, email, role, active, lastLogin, createdAt FROM User WHERE id=?', [r.insertId])
-    res.status(201).json({ ...row, active: !!row.active })
-  } catch (e) { res.status(500).json({ error: e.message }) }
-})
-
-app.put('/v3/admin/users/:id', requireAdmin, async (req, res) => {
-  try {
-    const { firstName, lastName, role, password } = req.body
-    const fields = [], vals = []
-    if (firstName) { fields.push('name=?'); vals.push(firstName) }
-    if (lastName !== undefined) { fields.push('lastName=?'); vals.push(lastName) }
-    if (role) { fields.push('role=?'); vals.push(role.toUpperCase()) }
-    if (password) {
-      let hash
-      try {
-        const bcrypt = require('bcryptjs')
-        hash = await bcrypt.hash(password, 12)
-      } catch {
-        try {
-          const bcrypt = require('bcrypt')
-          hash = await bcrypt.hash(password, 12)
-        } catch {
-          const crypto = require('crypto')
-          hash = '$plain$' + crypto.createHash('sha256').update(password).digest('hex')
-        }
-      }
-      fields.push('password=?'); vals.push(hash)
-    }
-    if (!fields.length) return res.status(400).json({ error: 'Nothing to update' })
-    vals.push(req.params.id)
-    await pool.query(`UPDATE User SET ${fields.join(',')} WHERE id=?`, vals)
-    const [[row]] = await pool.query('SELECT id, name AS firstName, lastName, email, role, active, lastLogin, createdAt FROM User WHERE id=?', [req.params.id])
-    res.json({ ...row, active: !!row.active })
-  } catch (e) { res.status(500).json({ error: e.message }) }
+    fields.push('password=?'); vals.push(hash)
+  }
+  if (!fields.length) return res.status(400).json({ error: 'Nothing to update' })
+  vals.push(req.params.id)
+  await pool.query(`UPDATE User SET ${fields.join(',')} WHERE id=?`, vals)
+  const [[row]] = await pool.query('SELECT id, name AS firstName, lastName, email, role, active, lastLogin, createdAt FROM User WHERE id=?', [req.params.id])
+  res.json({ ...row, active: !!row.active })
 })
 
 app.delete('/v3/admin/users/:id', requireAdmin, async (req, res) => {
-  try {
-    await pool.query('DELETE FROM User WHERE id=?', [req.params.id])
-    res.json({ ok: true })
-  } catch (e) { res.status(500).json({ error: e.message }) }
+  await pool.query('DELETE FROM User WHERE id=?', [req.params.id])
+  res.json({ ok: true })
 })
 
 app.patch('/v3/admin/users/:id/status', requireAdmin, async (req, res) => {
-  try {
-    const { active } = req.body
-    await pool.query('UPDATE User SET active=? WHERE id=?', [active ? 1 : 0, req.params.id])
-    res.json({ ok: true })
-  } catch (e) { res.status(500).json({ error: e.message }) }
-})
-
-
-// ── Public review submit ──────────────────────────────────────────────────────
-app.post('/reviews', async (req, res) => {
-  try {
-    const { tour_id, reservation_code, firstName, country = null, rating = 5, comment = '', language = 'es' } = req.body
-    if (!tour_id || !firstName) return res.status(400).json({ error: 'tour_id y firstName requeridos' })
-    if (Number(rating) < 1 || Number(rating) > 5) return res.status(400).json({ error: 'rating debe ser 1-5' })
-    const [[tour]] = await pool.query('SELECT id FROM Tour WHERE id=? AND active=1', [tour_id])
-    if (!tour) return res.status(404).json({ error: 'Tour no encontrado' })
-    let reservationId = null
-    if (reservation_code) {
-      const [[resv]] = await pool.query('SELECT id FROM Reservation WHERE code=?', [reservation_code])
-      if (resv) reservationId = resv.id
-    }
-    const [r] = await pool.query(
-      'INSERT INTO Review (tourId,reservationId,firstName,country,rating,comment,language,approved,createdAt) VALUES (?,?,?,?,?,?,?,0,NOW())',
-      [tour_id, reservationId, String(firstName).trim(), country, Math.round(Number(rating)), String(comment||'').trim(), language]
-    )
-    res.json({ ok: true, id: r.insertId })
-  } catch (e) { res.status(500).json({ error: e.message }) }
+  const { active } = req.body
+  await pool.query('UPDATE User SET active=? WHERE id=?', [active ? 1 : 0, req.params.id])
+  res.json({ ok: true })
 })
 
 app.listen(PORT, () => console.log(`dominicantour-api v3 running on :${PORT}`))

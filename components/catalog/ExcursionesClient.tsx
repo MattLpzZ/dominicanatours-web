@@ -1,11 +1,11 @@
 'use client'
-import { useState, useCallback, useMemo, useRef } from 'react'
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { TourCard } from '@/components/catalog/TourCard'
 
 export interface ApiCategory {
-  id: number; name: string; slug: string; icon: string | null; color: string
+  id: number; name: string; slug: string; icon: string | null; color: string; cover_image?: string | null
 }
 export interface ApiProduct {
   id: number; name: string; slug: string; subtitle: string | null
@@ -42,6 +42,16 @@ export function ExcursionesClient({ tours, categories, currentParams }: {
 
   const [search, setSearch]     = useState(currentParams.q ?? '')
   const [priceIdx, setPriceIdx] = useState(0)
+  const [savedSlugs, setSavedSlugs] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    fetch('/api/wishlist')
+      .then(r => r.ok ? r.json() : { items: [] })
+      .then(({ items }) => {
+        if (Array.isArray(items)) setSavedSlugs(new Set(items.map((i: { tourSlug: string }) => i.tourSlug)))
+      })
+      .catch(() => {})
+  }, [])
   const searchTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const PRICE_OPTS = [
@@ -161,7 +171,18 @@ export function ExcursionesClient({ tours, categories, currentParams }: {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {visibleTours.map(t => <TourCard key={t.id} tour={t} />)}
+            {visibleTours.map(t => (
+              <TourCard
+                key={t.id}
+                tour={t}
+                initialSaved={savedSlugs.has(t.slug)}
+                onSaveToggle={(slug, isSaved) => setSavedSlugs(prev => {
+                  const next = new Set(prev)
+                  if (isSaved) next.add(slug); else next.delete(slug)
+                  return next
+                })}
+              />
+            ))}
           </div>
         )}
       </section>

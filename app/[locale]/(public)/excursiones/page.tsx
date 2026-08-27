@@ -9,7 +9,7 @@ const BASE_URL = 'https://dominicanatour.com'
 
 interface Props {
   params: Promise<{ locale: string }>
-  searchParams: Promise<{ cat?: string; diff?: string; zone?: string; sort?: string; q?: string; maxPrice?: string; duration?: string }>
+  searchParams: Promise<{ cat?: string; diff?: string; zone?: string; sort?: string; q?: string; maxPrice?: string; minPrice?: string; duration?: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -91,6 +91,9 @@ export default async function CatalogPage({ searchParams }: Props) {
   if (params.maxPrice) {
     tours = tours.filter(t => Number(t.price_adult) <= Number(params.maxPrice))
   }
+  if (params.minPrice) {
+    tours = tours.filter(t => Number(t.price_adult) >= Number(params.minPrice))
+  }
   if (params.duration === 'half') {
     tours = tours.filter(t => t.duration?.toLowerCase().includes('medio'))
   } else if (params.duration === 'full') {
@@ -105,9 +108,21 @@ export default async function CatalogPage({ searchParams }: Props) {
     tours = [...tours].sort((a, b) => (b.featured ? 1 : 0) - (a.featured ? 1 : 0))
   }
 
+  const activeCat = params.cat ? categories.find(c => c.slug === params.cat) : null
+
   return (
     <>
       <ItemListLd tours={tours} />
+      {activeCat?.cover_image && (
+        <div className="relative h-36 sm:h-48 overflow-hidden">
+          <img src={activeCat.cover_image} alt={activeCat.name} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1">
+            <p className="text-xs font-bold uppercase tracking-widest text-white/60">Categoría</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-white text-center px-4">{activeCat.name}</h1>
+            <p className="text-sm text-white/70">{tours.length} {tours.length === 1 ? 'excursión' : 'excursiones'}</p>
+          </div>
+        </div>
+      )}
       <ExcursionesClient tours={tours} categories={categories} currentParams={params} />
     </>
   )
