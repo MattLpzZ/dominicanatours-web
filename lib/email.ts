@@ -228,3 +228,59 @@ export async function sendBookingConfirmed(data: StatusEmailData): Promise<void>
     html:    confirmedHtml(data),
   })
 }
+
+// ── Password Reset ────────────────────────────────────────────────────────────
+export interface PasswordResetEmailData {
+  email: string
+  name:  string | null
+  token: string
+}
+
+function passwordResetHtml(d: PasswordResetEmailData): string {
+  const resetUrl = `https://dominicantour.leymaken.com/admin/login?token=${d.token}`
+  const displayName = d.name || 'Admin'
+
+  const hero = `
+    <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:rgba(255,255,255,0.75);text-transform:uppercase;letter-spacing:0.1em">Restablecer contraseña</p>
+    <p style="margin:0;font-size:26px;font-weight:900;color:#ffffff;line-height:1.2">Hola, ${displayName}</p>`
+
+  const body = `
+    <p style="margin:0 0 24px;color:#555555;font-size:15px;line-height:1.65">
+      Recibimos una solicitud para restablecer la contraseña de tu cuenta en el panel de Dominicana Tour.
+      Si no fuiste tú, puedes ignorar este correo.
+    </p>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0">
+      <tr><td align="center">
+        <a href="${resetUrl}" style="display:inline-block;background-color:#f97316;color:#ffffff;font-weight:700;font-size:15px;padding:14px 36px;border-radius:10px;text-decoration:none">
+          Restablecer contraseña →
+        </a>
+      </td></tr>
+    </table>
+
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#FFF7F4"
+           style="background-color:#FFF7F4;border-left:3px solid #f97316;border-radius:0 8px 8px 0;margin-bottom:24px">
+      <tr><td style="padding:12px 16px">
+        <p style="margin:0;font-size:13px;color:#666666;line-height:1.6">
+          Este enlace expira en <strong style="color:#111111">1 hora</strong>.<br>
+          Si el botón no funciona, copia y pega esta URL en tu navegador:<br>
+          <span style="font-size:11px;color:#888888;word-break:break-all">${resetUrl}</span>
+        </p>
+      </td></tr>
+    </table>
+
+    <p style="margin:0;font-size:13px;color:#999999;line-height:1.6">
+      ¿Problemas? Contacta al administrador del sistema.
+    </p>`
+
+  return shell('#111111', hero, body)
+}
+
+export async function sendPasswordReset(data: PasswordResetEmailData): Promise<void> {
+  await getTransport().sendMail({
+    from:    FROM,
+    to:      data.email,
+    subject: 'Restablecer contraseña — Dominicana Tour Admin',
+    html:    passwordResetHtml(data),
+  })
+}

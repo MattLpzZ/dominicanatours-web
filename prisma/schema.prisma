@@ -342,3 +342,14 @@ model AccommodationImage {
 
   @@map("accommodation_images")
 }
+
+model PasswordResetToken {
+  id        Int      @id @default(autoincrement())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  @@map("password_reset_tokens")
+  @@index([email])
+}
