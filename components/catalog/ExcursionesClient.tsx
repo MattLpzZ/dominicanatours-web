@@ -3,6 +3,7 @@ import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { TourCard } from '@/components/catalog/TourCard'
+import { CategoryIcon } from '@/components/ui/CategoryIcon'
 
 export interface ApiCategory {
   id: number; name: string; slug: string; icon: string | null; color: string; cover_image?: string | null
@@ -151,7 +152,7 @@ export function ExcursionesClient({ tours, categories, currentParams }: {
                   style={active
                     ? { background: color + 'cc', color: '#fff' }
                     : { background: 'var(--color-bg-2)', border: '1px solid var(--color-border)', color: 'var(--color-text-3)' }}>
-                  {c.name}
+                  <span className="inline-flex items-center gap-1"><CategoryIcon name={c.icon} className="w-3 h-3 shrink-0" />{c.name}</span>
                 </button>
               )
             })}

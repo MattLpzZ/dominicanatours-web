@@ -5,7 +5,7 @@ interface ApiProduct {
   departure_zone?: string
   cover_image: string | null
 }
-interface ApiCategory { id: number; name: string; slug: string }
+interface ApiCategory { id: number; name: string; slug: string; icon?: string | null }
 
 export async function NavbarServer() {
   let zones: ZoneNav[]      = []

@@ -1,4 +1,5 @@
 'use client'
+import { CategoryIcon } from '@/components/ui/CategoryIcon'
 import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { useState, useEffect, useRef } from 'react'
@@ -9,7 +10,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { CartTray } from '@/components/cart/CartTray'
 
 export interface ZoneNav { name: string; count: number; image: string | null }
-export interface CatNav  { id: number; name: string; slug: string }
+export interface CatNav  { id: number; name: string; slug: string; icon?: string | null }
 
 const CAT_COLORS = ['#0369a1','#0891b2','#1d4ed8','#15803d','#b45309','#7c3aed','#be185d','#0f766e','#c2410c']
 const catColor = (name: string) => CAT_COLORS[name.charCodeAt(0) % CAT_COLORS.length]
