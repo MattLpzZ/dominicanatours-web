@@ -13,8 +13,8 @@ jobs:
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          timeout: 300s
+          password: ${{ secrets.VPS_PASSWORD }}
+          timeout: 360s
           script: |
             set -e
             CONTAINER="qo4rkltla0uptws0yxic4b8w-707x8ke5t3xww2u0roqbsood-011433307711-1"
