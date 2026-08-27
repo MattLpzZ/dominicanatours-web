@@ -1,8 +1,10 @@
 'use strict'
-const express = require('express')
-const cors = require('cors')
-const mysql = require('mysql2/promise')
-const jwt = require('jsonwebtoken')
+const express    = require('express')
+const cors       = require('cors')
+const mysql      = require('mysql2/promise')
+const jwt        = require('jsonwebtoken')
+const cron       = require('node-cron')
+const nodemailer = require('nodemailer')
 
 const app = express()
 app.set('trust proxy', 1)
