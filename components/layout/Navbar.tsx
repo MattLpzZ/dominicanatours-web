@@ -232,10 +232,10 @@ export function Navbar({ zones = [], categories = [] }: Props) {
                   className="group flex items-center gap-2.5 px-4 py-2.5 rounded-lg border border-dt-border bg-dt-bg-2 hover:border-accent/30 hover:-translate-y-[2px] hover:shadow-[0_4px_12px_rgba(0,0,0,0.06)] transition-all"
                 >
                   <div
-                    className="w-[30px] h-[30px] rounded-[7px] flex items-center justify-center text-white text-[12px] font-black shrink-0"
+                    className="w-[30px] h-[30px] rounded-[7px] flex items-center justify-center text-white shrink-0"
                     style={{ background: catColor(cat.name) }}
                   >
-                    {cat.name[0].toUpperCase()}
+                    <CategoryIcon name={cat.icon} className="w-4 h-4" />
                   </div>
                   <span className="text-[13px] font-semibold text-dt-text group-hover:text-accent transition-colors whitespace-nowrap">
                     {cat.name}
