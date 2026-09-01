@@ -41,9 +41,11 @@ jobs:
               -e NEXT_PUBLIC_API_URL="${{ secrets.DT_API_URL }}" \
               -e GOOGLE_CLIENT_ID="${{ secrets.DT_GOOGLE_CLIENT_ID }}" \
               -e GOOGLE_CLIENT_SECRET="${{ secrets.DT_GOOGLE_CLIENT_SECRET }}" \
-              -e SMTP_HOST="172.18.0.1" \
-              -e SMTP_PORT="25" \
-              -e SMTP_FROM="Dominicana Tour <info@dominicanatour.com>" \
+              -e SMTP_HOST="mail.dominicanatour.com" \
+              -e SMTP_PORT="587" \
+              -e SMTP_USER="${{ secrets.DT_SMTP_USER }}" \
+              -e SMTP_PASS="${{ secrets.DT_SMTP_PASS }}" \
+              -e SMTP_FROM="Dominicana Tour <no-reply@dominicanatour.com>" \
               -e TELEGRAM_BOT_TOKEN="${{ secrets.DT_TELEGRAM_BOT_TOKEN }}" \
               -e TELEGRAM_CHAT_ID="${{ secrets.DT_TELEGRAM_CHAT_ID }}" \
               -e PORT=3000 \
