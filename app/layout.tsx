@@ -4,6 +4,7 @@ import { ThemeProvider } from 'next-themes'
 import Script from 'next/script'
 import SessionProvider from './session-provider'
 import { EditModeListener } from '@/components/EditModeListener'
+import BetaBanner from '@/components/ui/BetaBanner'
 import './globals.css'
 
 const GA_ID = 'G-40LNPXX177'
@@ -175,6 +176,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SessionProvider>
           <ThemeProvider attribute="class" defaultTheme="light" disableTransitionOnChange={false}>
             <EditModeListener />
+            <BetaBanner />
             {children}
           </ThemeProvider>
         </SessionProvider>
