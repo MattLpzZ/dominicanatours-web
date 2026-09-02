@@ -1,5 +1,6 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
+import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 
@@ -131,7 +132,12 @@ function ResvCard({ r }: { r: ReservationCard }) {
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
+const CHAT_ROUTES = ['/contacto', '/sobre-nosotros', '/consultar-reserva', '/cuenta']
+
 export function ChatWidget() {
+  const pathname = usePathname()
+  if (!CHAT_ROUTES.some(r => pathname?.endsWith(r))) return null
+
   const [open,     setOpen]     = useState(false)
   const [messages, setMessages] = useState<Message[]>([WELCOME])
   const [input,    setInput]    = useState('')
