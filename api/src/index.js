@@ -1301,6 +1301,107 @@ app.post('/v3/admin/send-reminders', requireAdmin, async (req, res) => {
   }
 })
 
+// ── Public v3 API (leymaken-storefront) ──────────────────────────────────────
+
+app.get('/v3/public/tours', async (req, res) => {
+  const [rows] = await pool.query(`
+    SELECT t.id, t.slug, t.name, t.subtitle, t.description,
+           t.priceAdult, t.priceChild, t.duration, t.difficulty,
+           t.departureZone, t.departureTime, t.languages, t.featured,
+           (SELECT ti.url FROM TourImage ti WHERE ti.tourId=t.id ORDER BY ti.\`order\` LIMIT 1) AS cover_image
+    FROM Tour t
+    WHERE t.active=1
+    ORDER BY t.featured DESC, t.name
+  `)
+  res.json(rows.map(t => ({
+    id: t.id, slug: t.slug, name: t.name, subtitle: t.subtitle,
+    description: t.description,
+    priceAdult: Number(t.priceAdult), priceChild: Number(t.priceChild),
+    duration: t.duration, difficulty: t.difficulty,
+    departureZone: t.departureZone, departureTime: t.departureTime,
+    languages: t.languages, cover_image: t.cover_image,
+    featured: Boolean(t.featured),
+  })))
+})
+
+app.get('/v3/public/tours/:slug', async (req, res) => {
+  const [tours] = await pool.query(`
+    SELECT t.id, t.slug, t.name, t.subtitle, t.description,
+           t.priceAdult, t.priceChild, t.duration, t.difficulty,
+           t.departureZone, t.departureTime, t.languages, t.featured
+    FROM Tour t WHERE t.slug=? AND t.active=1
+  `, [req.params.slug])
+  if (!tours.length) return res.status(404).json({ message: 'Tour not found' })
+  const t = tours[0]
+
+  const [images]    = await pool.query('SELECT id, url, alt FROM TourImage WHERE tourId=? ORDER BY `order`', [t.id])
+  const [dates]     = await pool.query(`
+    SELECT id, DATE_FORMAT(date,'%Y-%m-%d') AS date,
+           (availableSpots - bookedSpots) AS availableSpots,
+           CASE WHEN (availableSpots - bookedSpots) <= 0 THEN 'FULL' ELSE status END AS status
+    FROM TourDate
+    WHERE tourId=? AND date >= CURDATE() AND status != 'BLOCKED'
+    ORDER BY date LIMIT 90
+  `, [t.id])
+  const [itinerary] = await pool.query('SELECT id, time, title, description, `order` FROM ItineraryItem WHERE tourId=? ORDER BY `order`', [t.id])
+  const [includes]  = await pool.query('SELECT id, text, included FROM TourInclude WHERE tourId=?', [t.id])
+
+  res.json({
+    id: t.id, slug: t.slug, name: t.name, subtitle: t.subtitle,
+    description: t.description,
+    priceAdult: Number(t.priceAdult), priceChild: Number(t.priceChild),
+    duration: t.duration, difficulty: t.difficulty,
+    departureZone: t.departureZone, departureTime: t.departureTime,
+    languages: t.languages, featured: Boolean(t.featured),
+    images: images.map(i => ({ id: i.id, url: i.url, alt: i.alt || '' })),
+    dates: dates.map(d => ({ id: d.id, date: d.date, availableSpots: d.availableSpots, status: d.status })),
+    itinerary: itinerary.map(i => ({ id: i.id, time: i.time, title: i.title, description: i.description, order: i.order })),
+    includes: includes.map(i => ({ id: i.id, text: i.text, included: Boolean(i.included) })),
+  })
+})
+
+app.post('/v3/public/reservations', async (req, res) => {
+  const {
+    tourId, tourDateId,
+    firstName, lastName = '', email = '', phone,
+    country = '', hotel = '', hotelZone = '', language = 'es',
+    adults = 1, children = 0, notes = null,
+  } = req.body || {}
+
+  if (!tourId || !tourDateId || !firstName || !phone)
+    return res.status(400).json({ message: 'Faltan campos requeridos' })
+
+  const [tours] = await pool.query('SELECT id, priceAdult, priceChild FROM Tour WHERE id=? AND active=1', [tourId])
+  if (!tours.length) return res.status(404).json({ message: 'Tour no encontrado' })
+  const tour = tours[0]
+
+  const [slots] = await pool.query('SELECT id, availableSpots, bookedSpots FROM TourDate WHERE id=? AND tourId=?', [tourDateId, tourId])
+  if (!slots.length) return res.status(404).json({ message: 'Fecha no disponible' })
+  if (slots[0].bookedSpots >= slots[0].availableSpots)
+    return res.status(400).json({ message: 'No hay cupos disponibles para esta fecha' })
+
+  const totalAmount = Number(tour.priceAdult) * Number(adults) + Number(tour.priceChild ?? 0) * Number(children)
+  const depositAmount = Math.ceil(totalAmount * 0.2 * 100) / 100
+  const code = genCode()
+
+  await pool.query(`
+    INSERT INTO Reservation
+      (code, tourId, tourDateId, status, firstName, lastName, email, phone,
+       country, hotel, hotelZone, language, adults, children,
+       totalAmount, depositAmount, paymentMethod, paidDeposit, notes, createdAt, updatedAt)
+    VALUES (?, ?, ?, 'PENDING', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'whatsapp', 0, ?, NOW(), NOW())
+  `, [code, tourId, tourDateId,
+      firstName, lastName, email, phone,
+      country, hotel, hotelZone, language,
+      adults, children,
+      totalAmount, depositAmount, notes || null])
+
+  await pool.query('UPDATE TourDate SET bookedSpots = bookedSpots + ? WHERE id=?',
+    [Number(adults) + Number(children), tourDateId])
+
+  res.json({ ok: true, code })
+})
+
 // ── Error handler ─────────────────────────────────────────────────────────────
 app.use((err, req, res, _next) => {
   console.error(err)
