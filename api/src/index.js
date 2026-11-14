@@ -1065,9 +1065,7 @@ app.delete('/v3/admin/accommodations/:id/images/:imgId', requireAdmin, async (re
   res.json({ ok: true })
 })
 
-// ── Mailer (nodemailer) ────────────────────────────────────────────────────────
-const nodemailer = require('nodemailer')
-
+// ── Mailer ────────────────────────────────────────────────────────────────────
 function getMailer() {
   return nodemailer.createTransport({
     host:   process.env.SMTP_HOST || '172.18.0.1',
